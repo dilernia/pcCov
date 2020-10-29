@@ -17,7 +17,7 @@ royVarhelper(p, diags = FALSE, errors = FALSE)
 Matrix of indices for assisting in efficient calculation of asymptotic covariance matrix estimate using either royVar() or partialCov_cpp()
 }
 \description{
-This function uses the inverse covariance matrix to calculate the partial correlation matrix
+This function assists in the efficient calculation of an asymptotic covariance matrix estimate using either royVar() or partialCov_cpp()
 }
 \author{
 Andrew DiLernia
