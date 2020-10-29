@@ -64,7 +64,18 @@ invCov2part <- function(icmat) {
   return(pmat)
 }
 
-# Roy variance estimate function
+#' Helper Function for Calculating Asymptotic Covariance of Partial Correlations
+#'
+#' This function uses the inverse covariance matrix to calculate the partial correlation matrix
+#' @param p number of variables in data set
+#' @param diags Logical. (I think?) Only include indices for diagonal of covariance matrix (TRUE) or not (FALSE)
+#' @param errors Logical. Create indices for correlations between errors (TRUE) or correlations between variables (FALSE)
+#' @return Matrix of indices for assisting in efficient calculation of asymptotic covariance matrix estimate using either royVar() or partialCov_cpp()
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @export
 royVarhelper <- function(p, diags = FALSE, errors = FALSE) {
 
   q <- choose(p, 2)
