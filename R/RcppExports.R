@@ -77,17 +77,6 @@ upperTriFill_cpp <- function(n, x) {
 #' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = T).
 #' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
 #'
-#' @examples
-#' # Generate multivariate time series with 5 variables from a
-#' # first-order VAR model with 50 time points
-#' set.seed(1994)
-#' myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
-#'
-#' # Asymptotic covariance matrix for partial correlations
-#' p <- ncol(myTS)
-#' partialCov_cpp(myTS, bw = 5, iMatq = unique(royVarhelper(p)[, 1:2]),
-#' iMate = royVarhelper(p, errors = T), q = choose(p, 2))
-#'
 #' @author
 #' Andrew DiLernia
 #'
