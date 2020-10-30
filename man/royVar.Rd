@@ -11,7 +11,7 @@ royVar(ts, partial = TRUE, bw = NULL)
 
 \item{partial}{Logical. Calculate the asymptotic covariance matrix for the partial correlations (TRUE) or marginal correlations (FALSE)}
 
-\item{bw}{Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the \link[np::b.star]{method} described in Patton, Politis and White (2009).}
+\item{bw}{Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).}
 }
 \value{
 \eqn{p} x \eqn{p} asymptotic covariance matrix

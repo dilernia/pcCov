@@ -9,7 +9,7 @@ bootVar(ts, winLength = NULL)
 \arguments{
 \item{ts}{\eqn{nt} x \eqn{p} matrix of the observed \eqn{p}-variate time series}
 
-\item{winLength}{Specified window length for block-bootstrap (Optional). If not specified, block-length is determined using the \link[np::b.star]{method} described in Patton, Politis and White (2009).}
+\item{winLength}{Specified window length for block-bootstrap (Optional). If not specified, block-length is determined using the method described in Patton, Politis and White (2009).}
 }
 \value{
 A list of length 2 containing:
