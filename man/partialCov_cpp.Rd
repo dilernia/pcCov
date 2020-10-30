@@ -20,18 +20,6 @@ partialCov_cpp(ts, bw, iMatq, iMate, q)
 \description{
 This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
 }
-\examples{
-# Generate multivariate time series with 5 variables from a
-# first-order VAR model with 50 time points
-set.seed(1994)
-myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
-
-# Asymptotic covariance matrix for partial correlations
-p <- ncol(myTS)
-partialCov_cpp(myTS, bw = 5, iMatq = unique(royVarhelper(p)[, 1:2]),
-iMate = royVarhelper(p, errors = T), q = choose(p, 2))
-
-}
 \author{
 Andrew DiLernia
 }
