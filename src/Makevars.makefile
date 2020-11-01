@@ -1,5 +1,5 @@
 
-## With R 3.1.0 or later, you can uncomment the following line to tell R to 
+## With R 3.1.0 or later, you can uncomment the following line to tell R to
 ## enable compilation with C++11 (where available)
 ##
 ## Also, OpenMP support in Armadillo prefers C++11 support. However, for wider
@@ -10,5 +10,13 @@
 ## support within Armadillo prefers / requires it
 CXX_STD = CXX11
 
-PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
+SHLIB_CXXLD=$(CCACHE) g++$(VER)
+SHLIB_CXXLDFLAGS = $(STRIP) -shared
+SHLIB_CXX11LDFLAGS = $(STRIP) -shared
+SHLIB_CXX14LDFLAGS = $(STRIP) -shared
+SHLIB_FCLDFLAGS = $(STRIP) -shared
+SHLIB_LDFLAGS = $(STRIP) -shared
+#SHLIB_CXXLD=clang
+
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS)
 PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
