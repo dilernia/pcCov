@@ -4,77 +4,188 @@
 #' Convert Eigen matrix to Arma matrix
 #'
 #' @param eigen_A A matrix.
+#'
 #' @author
 #' Andrew DiLernia
+#'
 #' @export
 eigen2arma <- function(eigen_A) {
     .Call(`_pcCov_eigen2arma`, eigen_A)
 }
 
+#' Convert Arma matrix to Eigen matrix
+#'
+#' @param arma_A A matrix.
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @export
 arma2eigen <- function(arma_A) {
     .Call(`_pcCov_arma2eigen`, arma_A)
 }
 
+#' Multiply two matrices
+#'
+#' @param A A matrix.
+#' @param B A matrix.
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 eigenMult2 <- function(A, B) {
     .Call(`_pcCov_eigenMult2`, A, B)
 }
 
+#' Multiply three matrices
+#'
+#' @param A A matrix.
+#' @param B A matrix.
+#' @param C A matrix.
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 eigenMult3 <- function(A, B, C) {
     .Call(`_pcCov_eigenMult3`, A, B, C)
 }
 
+#' Multiply four matrices
+#'
+#' @param A A matrix.
+#' @param B A matrix.
+#' @param C A matrix.
+#' @param D A matrix.
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 eigenMult4 <- function(A, B, C, D) {
     .Call(`_pcCov_eigenMult4`, A, B, C, D)
 }
 
+#' Convert inverse-covariance matrix to partial correlation matrix
+#'
+#' @param icmat An inverse-covariance matrix.
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 invCov2part_cpp <- function(icmat) {
     .Call(`_pcCov_invCov2part_cpp`, icmat)
 }
 
+#' Convert covariance matrix to correlation matrix
+#'
+#' @param cmat A covariance matrix.
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 cov2corr_cpp <- function(cmat) {
     .Call(`_pcCov_cov2corr_cpp`, cmat)
 }
 
+#' Calculate marginal or partial correlation matrix
+#'
+#' @param tsData A data matrix.
+#' @param partial Logical. Whether to calculate partial (TRUE) or marginal (FALSE) correlation matrix
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 corrMat_cpp <- function(tsData, partial = TRUE) {
     .Call(`_pcCov_corrMat_cpp`, tsData, partial)
 }
 
+#'
+#' @param u Vector of indices for window
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 cosTaper_cpp <- function(u) {
     .Call(`_pcCov_cosTaper_cpp`, u)
 }
 
+#'
+#' @param u Vector of indices for window
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 expTaper_cpp <- function(u) {
     .Call(`_pcCov_expTaper_cpp`, u)
 }
 
+#'
+#' @param u Vector of indices for window
+#' @param ts1 First time series vector
+#' @param ts2 Second time series vector
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 crossCov_cpp <- function(u, ts1, ts2) {
     .Call(`_pcCov_crossCov_cpp`, u, ts1, ts2)
 }
 
+#'
+#' @param u Vector of indices for window
+#' @param ts1 First time series vector
+#' @param ts2 Second time series vector
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 crossCov2_cpp <- function(u, ts1, ts2) {
     .Call(`_pcCov_crossCov2_cpp`, u, ts1, ts2)
 }
 
+#'
+#' @param ts1 First time series vector
+#' @param ts2 Second time series vector
+#' @param banw Bandwidth parameter
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 taperCov_cpp <- function(ts1, ts2, banw) {
     .Call(`_pcCov_taperCov_cpp`, ts1, ts2, banw)
 }
 
+#'
+#' @param ts1 First time series vector
+#' @param ts2 Second time series vector
+#' @param banw Bandwidth parameter
+#' @param hu2s Weights from selected taper function
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 taperCovSub_cpp <- function(ts1, ts2, banw, hu2s) {
     .Call(`_pcCov_taperCovSub_cpp`, ts1, ts2, banw, hu2s)
 }
 
+#'
+#' @param n Number of rows / columns of matrix
+#' @param x Values to fill upper-triangle with
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 upperTriFill_cpp <- function(n, x) {
     .Call(`_pcCov_upperTriFill_cpp`, n, x)
@@ -106,6 +217,15 @@ deltaHat_cpp <- function(i, j, l, m, mvts, n, hu2s, ccs, ccMat) {
     .Call(`_pcCov_deltaHat_cpp`, i, j, l, m, mvts, n, hu2s, ccs, ccMat)
 }
 
+#'
+#' @param iMat Matrix of correlation indices
+#' @param tsData Matrix of observed n-length p-variate time series
+#' @param q Integer equal to the number of unique variables pairs given by choose(p, 2)
+#' @param bw Bandwidth parameter
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 royVar_cpp <- function(iMat, tsData, q, bw = 10L) {
     .Call(`_pcCov_royVar_cpp`, iMat, tsData, q, bw)
@@ -116,6 +236,12 @@ royVar2_cpp <- function(iMat, tsData, q) {
     .Call(`_pcCov_royVar2_cpp`, iMat, tsData, q)
 }
 
+#'
+#' @param array3d 3D array of matrices to make into single block-diagonal matrix
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 bdiagArray_cpp <- function(array3d) {
     .Call(`_pcCov_bdiagArray_cpp`, array3d)
@@ -160,6 +286,17 @@ XtSX_cpp <- function(blocks, q, K) {
     .Call(`_pcCov_XtSX_cpp`, blocks, q, K)
 }
 
+#'
+#' @param ys List of K matrices containing observed p-variate time series
+#' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)
+#' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
+#' @param delta Threshold for algorithm
+#' @param maxIters Maximum number of iterations for algorithm
+#' @param sig0 Initial value for sigma parameter
+#'
+#' @author
+#' Andrew DiLernia
+#'
 #' @export
 royVcm_cpp <- function(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
     .Call(`_pcCov_royVcm_cpp`, ys, sigmas, sigEigs, delta, maxIters, sig0)

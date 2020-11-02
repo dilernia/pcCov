@@ -13,8 +13,10 @@ using namespace Rcpp;
 //' Convert Eigen matrix to Arma matrix
 //'
 //' @param eigen_A A matrix.
+//'
 //' @author
 //' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat eigen2arma(Eigen::MatrixXd eigen_A) {
@@ -24,6 +26,14 @@ arma::mat eigen2arma(Eigen::MatrixXd eigen_A) {
   return arma_B;
 }
 
+//' Convert Arma matrix to Eigen matrix
+//'
+//' @param arma_A A matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @export
 // [[Rcpp::export]]
 Eigen::MatrixXd arma2eigen(arma::mat arma_A) {
 
@@ -34,6 +44,14 @@ Eigen::MatrixXd arma2eigen(arma::mat arma_A) {
   return eigen_B;
 }
 
+//' Multiply two matrices
+//'
+//' @param A A matrix.
+//' @param B A matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat eigenMult2(arma::mat A, arma::mat B) {
@@ -42,6 +60,15 @@ arma::mat eigenMult2(arma::mat A, arma::mat B) {
   return eigen2arma(C);
 }
 
+//' Multiply three matrices
+//'
+//' @param A A matrix.
+//' @param B A matrix.
+//' @param C A matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat eigenMult3(arma::mat A, arma::mat B, arma::mat C){
@@ -55,6 +82,16 @@ arma::mat eigenMult3(arma::mat A, arma::mat B, arma::mat C){
   return(ret);
 }
 
+//' Multiply four matrices
+//'
+//' @param A A matrix.
+//' @param B A matrix.
+//' @param C A matrix.
+//' @param D A matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat eigenMult4(arma::mat A, arma::mat B, arma::mat C, arma::mat D){
@@ -68,6 +105,13 @@ arma::mat eigenMult4(arma::mat A, arma::mat B, arma::mat C, arma::mat D){
   return(ret);
 }
 
+//' Convert inverse-covariance matrix to partial correlation matrix
+//'
+//' @param icmat An inverse-covariance matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat invCov2part_cpp(arma::mat icmat) {
@@ -81,6 +125,13 @@ arma::mat invCov2part_cpp(arma::mat icmat) {
   return(pmat);
 }
 
+//' Convert covariance matrix to correlation matrix
+//'
+//' @param cmat A covariance matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat cov2corr_cpp(arma::mat cmat) {
@@ -94,6 +145,14 @@ arma::mat cov2corr_cpp(arma::mat cmat) {
   return(corrMat);
 }
 
+//' Calculate marginal or partial correlation matrix
+//'
+//' @param tsData A data matrix.
+//' @param partial Logical. Whether to calculate partial (TRUE) or marginal (FALSE) correlation matrix
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat corrMat_cpp(arma::mat tsData, bool partial = true) {
@@ -107,7 +166,13 @@ arma::mat corrMat_cpp(arma::mat tsData, bool partial = true) {
   }
 }
 
-//Function for Hann window taper
+// Function for Hann window taper
+//'
+//' @param u Vector of indices for window
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 NumericVector cosTaper_cpp(IntegerVector u){
@@ -116,7 +181,13 @@ NumericVector cosTaper_cpp(IntegerVector u){
   return(sqrtRet * sqrtRet);
 }
 
-//Function for exponential window taper
+// Function for exponential window taper
+//'
+//' @param u Vector of indices for window
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 NumericVector expTaper_cpp(IntegerVector u){
@@ -125,6 +196,15 @@ NumericVector expTaper_cpp(IntegerVector u){
   return(ret);
 }
 
+// Calculate cross-covariance of two vectors
+//'
+//' @param u Vector of indices for window
+//' @param ts1 First time series vector
+//' @param ts2 Second time series vector
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 double crossCov_cpp(int u, arma::vec ts1, arma::vec ts2) {
@@ -140,6 +220,15 @@ double crossCov_cpp(int u, arma::vec ts1, arma::vec ts2) {
   }
 }
 
+// Calculate cross-covariance of two vectors
+//'
+//' @param u Vector of indices for window
+//' @param ts1 First time series vector
+//' @param ts2 Second time series vector
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat crossCov2_cpp(int u, arma::vec ts1, arma::vec ts2) {
@@ -158,6 +247,15 @@ arma::mat crossCov2_cpp(int u, arma::vec ts1, arma::vec ts2) {
   }
 }
 
+// Calculate taper for two vectors
+//'
+//' @param ts1 First time series vector
+//' @param ts2 Second time series vector
+//' @param banw Bandwidth parameter
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
@@ -195,6 +293,16 @@ arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
   return(sigma + sigma.t());
 }
 
+// Calculate taper for two vectors
+//'
+//' @param ts1 First time series vector
+//' @param ts2 Second time series vector
+//' @param banw Bandwidth parameter
+//' @param hu2s Weights from selected taper function
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat taperCovSub_cpp(arma::vec ts1, arma::vec ts2, int banw, arma::vec hu2s) {
@@ -231,6 +339,14 @@ arma::mat taperCovSub_cpp(arma::vec ts1, arma::vec ts2, int banw, arma::vec hu2s
   return(sigma + sigma.t());
 }
 
+// Calculate upper-triangular matrix
+//'
+//' @param n Number of rows / columns of matrix
+//' @param x Values to fill upper-triangle with
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat upperTriFill_cpp(int n, arma::vec x) {
@@ -408,6 +524,16 @@ double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, NumericVe
   return(thetaHat_cpp(i, j, l, m, mvts, n, hu2s, ccMat) / sqrt(crossProd));
 }
 
+// Roy Asymptotic Variance
+//'
+//' @param iMat Matrix of correlation indices
+//' @param tsData Matrix of observed n-length p-variate time series
+//' @param q Integer equal to the number of unique variables pairs given by choose(p, 2)
+//' @param bw Bandwidth parameter
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat royVar_cpp(arma::mat iMat, arma::mat tsData, int q, int bw = 10) {
@@ -525,6 +651,13 @@ arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q) {
   return(ret);
 }
 
+// Construct Block-Diagonal Matrix
+//'
+//' @param array3d 3D array of matrices to make into single block-diagonal matrix
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 arma::mat bdiagArray_cpp(arma::cube array3d) {
@@ -688,6 +821,18 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
   return(XtSX);
 }
 
+// Variance Components Model using Roy (1989)'s Covariance Estimate
+//'
+//' @param ys List of K matrices containing observed p-variate time series
+//' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)
+//' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
+//' @param delta Threshold for algorithm
+//' @param maxIters Maximum number of iterations for algorithm
+//' @param sig0 Initial value for sigma parameter
+//'
+//' @author
+//' Andrew DiLernia
+//'
 //' @export
 // [[Rcpp::export]]
 List royVcm_cpp(arma::field<arma::mat> ys, arma::cube sigmas, arma::field<arma::mat> sigEigs,
