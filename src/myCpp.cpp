@@ -34,6 +34,7 @@ Eigen::MatrixXd arma2eigen(arma::mat arma_A) {
   return eigen_B;
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat eigenMult2(arma::mat A, arma::mat B) {
   Eigen::MatrixXd C = arma2eigen(A) * arma2eigen(B);
@@ -41,6 +42,7 @@ arma::mat eigenMult2(arma::mat A, arma::mat B) {
   return eigen2arma(C);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat eigenMult3(arma::mat A, arma::mat B, arma::mat C){
   Eigen::MatrixXd Aeig = arma2eigen(A);
@@ -53,6 +55,7 @@ arma::mat eigenMult3(arma::mat A, arma::mat B, arma::mat C){
   return(ret);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat eigenMult4(arma::mat A, arma::mat B, arma::mat C, arma::mat D){
   Eigen::MatrixXd Aeig = arma2eigen(A);
@@ -65,6 +68,7 @@ arma::mat eigenMult4(arma::mat A, arma::mat B, arma::mat C, arma::mat D){
   return(ret);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat invCov2part_cpp(arma::mat icmat) {
   int p = icmat.n_rows;
@@ -77,6 +81,7 @@ arma::mat invCov2part_cpp(arma::mat icmat) {
   return(pmat);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat cov2corr_cpp(arma::mat cmat) {
   int p = cmat.n_rows;
@@ -89,6 +94,7 @@ arma::mat cov2corr_cpp(arma::mat cmat) {
   return(corrMat);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat corrMat_cpp(arma::mat tsData, bool partial = true) {
   arma::mat cmat = arma::cov(tsData);
@@ -102,7 +108,8 @@ arma::mat corrMat_cpp(arma::mat tsData, bool partial = true) {
 }
 
 //Function for Hann window taper
-//[[Rcpp::export]]
+//' @export
+// [[Rcpp::export]]
 NumericVector cosTaper_cpp(IntegerVector u){
   IntegerVector uNew = u - min(u);
   NumericVector sqrtRet = sin(M_PI*as<NumericVector>(uNew) / u.size());
@@ -110,13 +117,15 @@ NumericVector cosTaper_cpp(IntegerVector u){
 }
 
 //Function for exponential window taper
-//[[Rcpp::export]]
+//' @export
+// [[Rcpp::export]]
 NumericVector expTaper_cpp(IntegerVector u){
   IntegerVector uNew = u - min(u);
   NumericVector ret = exp((-abs(as<NumericVector>(uNew) - u.size() / 2)) / (u.size() / 2 * 8.69 / 60));
   return(ret);
 }
 
+//' @export
 // [[Rcpp::export]]
 double crossCov_cpp(int u, arma::vec ts1, arma::vec ts2) {
   int N = ts1.n_elem;
@@ -131,6 +140,7 @@ double crossCov_cpp(int u, arma::vec ts1, arma::vec ts2) {
   }
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat crossCov2_cpp(int u, arma::vec ts1, arma::vec ts2) {
   int N = ts1.n_elem;
@@ -148,6 +158,7 @@ arma::mat crossCov2_cpp(int u, arma::vec ts1, arma::vec ts2) {
   }
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
   int N = ts1.n_elem;
@@ -184,6 +195,7 @@ arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
   return(sigma + sigma.t());
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat taperCovSub_cpp(arma::vec ts1, arma::vec ts2, int banw, arma::vec hu2s) {
   int N = ts1.n_elem;
@@ -219,6 +231,7 @@ arma::mat taperCovSub_cpp(arma::vec ts1, arma::vec ts2, int banw, arma::vec hu2s
   return(sigma + sigma.t());
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat upperTriFill_cpp(int n, arma::vec x) {
   arma::mat V = eye<mat>(n,n);
@@ -395,6 +408,7 @@ double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, NumericVe
   return(thetaHat_cpp(i, j, l, m, mvts, n, hu2s, ccMat) / sqrt(crossProd));
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat royVar_cpp(arma::mat iMat, arma::mat tsData, int q, int bw = 10) {
   int N = iMat.n_rows;
@@ -452,6 +466,7 @@ arma::mat royVar_cpp(arma::mat iMat, arma::mat tsData, int q, int bw = 10) {
   return(ret);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q) {
   int N = iMat.n_rows;
@@ -510,6 +525,7 @@ arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q) {
   return(ret);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat bdiagArray_cpp(arma::cube array3d) {
 
@@ -538,6 +554,7 @@ arma::mat xMaker_cpp(int K, int q) {
   return(X);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::mat arrayMean_cpp(arma::cube array3d) {
 
@@ -557,6 +574,7 @@ arma::mat arrayMean_cpp(arma::cube array3d) {
   return(avgMat / dim3);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::vec upperTri_cpp(arma::mat m, bool incDiag = false) {
   int n = m.n_cols;
@@ -626,6 +644,7 @@ arma::field<arma::mat> arrayEigen_cpp(arma::cube array3d) {
   return(eigList);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::field<arma::mat> eigen_cpp(arma::mat myMat) {
 
@@ -669,6 +688,7 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
   return(XtSX);
 }
 
+//' @export
 // [[Rcpp::export]]
 List royVcm_cpp(arma::field<arma::mat> ys, arma::cube sigmas, arma::field<arma::mat> sigEigs,
                 double delta = 0.001, int maxIters = 100, double sig0 = 0.10) {

@@ -15,54 +15,67 @@ arma2eigen <- function(arma_A) {
     .Call(`_pcCov_arma2eigen`, arma_A)
 }
 
+#' @export
 eigenMult2 <- function(A, B) {
     .Call(`_pcCov_eigenMult2`, A, B)
 }
 
+#' @export
 eigenMult3 <- function(A, B, C) {
     .Call(`_pcCov_eigenMult3`, A, B, C)
 }
 
+#' @export
 eigenMult4 <- function(A, B, C, D) {
     .Call(`_pcCov_eigenMult4`, A, B, C, D)
 }
 
+#' @export
 invCov2part_cpp <- function(icmat) {
     .Call(`_pcCov_invCov2part_cpp`, icmat)
 }
 
+#' @export
 cov2corr_cpp <- function(cmat) {
     .Call(`_pcCov_cov2corr_cpp`, cmat)
 }
 
+#' @export
 corrMat_cpp <- function(tsData, partial = TRUE) {
     .Call(`_pcCov_corrMat_cpp`, tsData, partial)
 }
 
+#' @export
 cosTaper_cpp <- function(u) {
     .Call(`_pcCov_cosTaper_cpp`, u)
 }
 
+#' @export
 expTaper_cpp <- function(u) {
     .Call(`_pcCov_expTaper_cpp`, u)
 }
 
+#' @export
 crossCov_cpp <- function(u, ts1, ts2) {
     .Call(`_pcCov_crossCov_cpp`, u, ts1, ts2)
 }
 
+#' @export
 crossCov2_cpp <- function(u, ts1, ts2) {
     .Call(`_pcCov_crossCov2_cpp`, u, ts1, ts2)
 }
 
+#' @export
 taperCov_cpp <- function(ts1, ts2, banw) {
     .Call(`_pcCov_taperCov_cpp`, ts1, ts2, banw)
 }
 
+#' @export
 taperCovSub_cpp <- function(ts1, ts2, banw, hu2s) {
     .Call(`_pcCov_taperCovSub_cpp`, ts1, ts2, banw, hu2s)
 }
 
+#' @export
 upperTriFill_cpp <- function(n, x) {
     .Call(`_pcCov_upperTriFill_cpp`, n, x)
 }
@@ -93,14 +106,17 @@ deltaHat_cpp <- function(i, j, l, m, mvts, n, hu2s, ccs, ccMat) {
     .Call(`_pcCov_deltaHat_cpp`, i, j, l, m, mvts, n, hu2s, ccs, ccMat)
 }
 
+#' @export
 royVar_cpp <- function(iMat, tsData, q, bw = 10L) {
     .Call(`_pcCov_royVar_cpp`, iMat, tsData, q, bw)
 }
 
+#' @export
 royVar2_cpp <- function(iMat, tsData, q) {
     .Call(`_pcCov_royVar2_cpp`, iMat, tsData, q)
 }
 
+#' @export
 bdiagArray_cpp <- function(array3d) {
     .Call(`_pcCov_bdiagArray_cpp`, array3d)
 }
@@ -109,10 +125,12 @@ xMaker_cpp <- function(K, q) {
     .Call(`_pcCov_xMaker_cpp`, K, q)
 }
 
+#' @export
 arrayMean_cpp <- function(array3d) {
     .Call(`_pcCov_arrayMean_cpp`, array3d)
 }
 
+#' @export
 upperTri_cpp <- function(m, incDiag = FALSE) {
     .Call(`_pcCov_upperTri_cpp`, m, incDiag)
 }
@@ -129,6 +147,7 @@ arrayEigen_cpp <- function(array3d) {
     .Call(`_pcCov_arrayEigen_cpp`, array3d)
 }
 
+#' @export
 eigen_cpp <- function(myMat) {
     .Call(`_pcCov_eigen_cpp`, myMat)
 }
@@ -141,6 +160,7 @@ XtSX_cpp <- function(blocks, q, K) {
     .Call(`_pcCov_XtSX_cpp`, blocks, q, K)
 }
 
+#' @export
 royVcm_cpp <- function(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
     .Call(`_pcCov_royVcm_cpp`, ys, sigmas, sigEigs, delta, maxIters, sig0)
 }
