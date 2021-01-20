@@ -44,7 +44,7 @@ bootVar <- function(ts, winLength = NULL) {
     return(pcs)})))
 
   bsPcCov <- cov(bootSamps)
-  bsCis <- t(apply(bootSamps, FUN = function(pcs){quantile(pcs, probs = c(0.025, 0.975))},
+  bsCis <- t(apply(bootSamps, FUN = function(pcs){quantile(pcs, probs = c(0.025, 0.975), na.rm = TRUE)},
                    MARGIN = 2))
 
   return(list(bsPcCov, bsCis))
