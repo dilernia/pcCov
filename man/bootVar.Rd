@@ -4,7 +4,7 @@
 \alias{bootVar}
 \title{Block-Bootstrap for Partial Correlations of a Multivariate Time Series}
 \usage{
-bootVar(ts, winLength = NULL)
+bootVar(ts, winLength = NULL, nboots = 1000)
 }
 \arguments{
 \item{ts}{\eqn{nt} x \eqn{p} matrix of the observed \eqn{p}-variate time series}
@@ -15,7 +15,7 @@ bootVar(ts, winLength = NULL)
 A list of length 2 containing:
 \enumerate{
 \item \eqn{q} x \eqn{q} estimated covariance matrix of the partial correlations where \eqn{q=}choose(\eqn{p}, 2)
-\item \eqn{q} x \eqn{2} matrix containing the lower (first column) and upper (second column) bounds of the 95% bootstrap confidence intervals.
+\item \eqn{q} x \eqn{2} matrix containing the lower (first column) and upper (second column) bounds of the 95\% bootstrap confidence intervals.
 }
 }
 \description{

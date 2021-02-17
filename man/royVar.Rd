@@ -14,7 +14,7 @@ royVar(ts, partial = TRUE, bw = NULL)
 \item{bw}{Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).}
 }
 \value{
-\eqn{p} x \eqn{p} asymptotic covariance matrix
+\eqn{q} x \eqn{q} asymptotic covariance matrix where \eqn{q=}choose(\eqn{p}, 2) if partial = TRUE, \eqn{p} x \eqn{p} asymptotic covariance matrix if partial = FALSE
 }
 \description{
 This function calculates Roy (1989)'s asymptotic covariance matrix for marginal or partial correlations

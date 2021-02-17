@@ -7,7 +7,7 @@
 #' @return A list of length 2 containing:
 #' \enumerate{
 #' \item \eqn{q} x \eqn{q} estimated covariance matrix of the partial correlations where \eqn{q=}choose(\eqn{p}, 2)
-#' \item \eqn{q} x \eqn{2} matrix containing the lower (first column) and upper (second column) bounds of the 95% bootstrap confidence intervals.
+#' \item \eqn{q} x \eqn{2} matrix containing the lower (first column) and upper (second column) bounds of the 95\% bootstrap confidence intervals.
 #' }
 #'
 #' @author
@@ -26,7 +26,7 @@
 #' Politis, D.N. and H. White (2004), "Automatic block-length selection for the dependent bootstrap", Econometric Reviews 23(1), 53-70.
 #'
 #' @export
-bootVar <- function(ts, winLength = NULL) {
+bootVar <- function(ts, winLength = NULL, nboots = 1000) {
   p <- ncol(ts)
   q <- choose(p, 2)
   N <- nrow(ts)
@@ -36,7 +36,7 @@ bootVar <- function(ts, winLength = NULL) {
   nBlocks <- round(N / (winLength))
   inds <- seq(N - winLength + 1)
 
-  bootSamps <- t(simplify2array(lapply(1:1000, FUN = function(x) {
+  bootSamps <- t(simplify2array(lapply(1:nboots, FUN = function(x) {
     bootsamp <- scale(do.call('rbind', lapply(1:nBlocks, FUN = function(b) {
       istart <- sample(inds, 1)
       ts[(1:N)[istart:(istart + winLength -1)], ]})))

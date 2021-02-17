@@ -114,7 +114,7 @@ testStat <- function(cMat, royCov) {
 #' @param ts \eqn{nt} x \eqn{p} matrix of the observed \eqn{p}-variate time series
 #' @param partial Logical. Calculate the asymptotic covariance matrix for the partial correlations (TRUE) or marginal correlations (FALSE)
 #' @param bw Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).
-#' @return \eqn{p} x \eqn{p} asymptotic covariance matrix
+#' @return \eqn{q} x \eqn{q} asymptotic covariance matrix where \eqn{q=}choose(\eqn{p}, 2) if partial = TRUE, \eqn{p} x \eqn{p} asymptotic covariance matrix if partial = FALSE
 #'
 #' @author
 #' Andrew DiLernia
