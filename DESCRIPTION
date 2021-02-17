@@ -2,9 +2,7 @@ Package: pcCov
 Title: Estimation of Partial Correlations for Multivariate Time Series
 Version: 0.0.0.9000
 Authors@R: as.person(c(
-    "Andrew DiLernia <andrew.s.dilernia@gmail.com> [aut, cre]", 
-    "Lin Zhang <zhan4800@umn.edu> [aut]",
-    "Mark Fiecas <mfiecas@umn.edu> [aut]"
+    "Andrew DiLernia <andrew.s.dilernia@gmail.com> [aut, cre]"
   ))
 Description: This package implements methods for inference of partial correlations for a weakly stationary multivariate time series. Methods of inference are based on second-order Taylor Series approximation of the covariances of the partial correlations.
 License: MIT + file LICENSE
@@ -23,3 +21,4 @@ LinkingTo:
     RcppArmadillo,
     RcppEigen,
     np
+StagedInstall: false
