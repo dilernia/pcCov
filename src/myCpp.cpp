@@ -983,6 +983,7 @@ List royTest_cpp2(arma::field<arma::mat> y1, arma::field<arma::mat> y2, arma::ma
 
 // [[Rcpp::depends(RcppArmadillo, RcppDist)]]
 
+//' @export
 // [[Rcpp::export]]
 double dwish_cpp(arma::mat X, int df, arma::mat S,
              bool log_p = false) {
@@ -992,6 +993,7 @@ double dwish_cpp(arma::mat X, int df, arma::mat S,
   return(ret);
 }
 
+//' @export
 // [[Rcpp::export]]
 double dwishArray_cpp(arma::cube Xarray, int df, arma::mat S,
                  bool log_p = false) {

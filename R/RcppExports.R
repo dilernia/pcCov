@@ -314,10 +314,12 @@ royTest_cpp2 <- function(y1, y2, iMat, alpha = 0.05, multAdj = "holm-bonferroni"
     .Call(`_pcCov_royTest_cpp2`, y1, y2, iMat, alpha, multAdj, nperm)
 }
 
+#' @export
 dwish_cpp <- function(X, df, S, log_p = FALSE) {
     .Call(`_pcCov_dwish_cpp`, X, df, S, log_p)
 }
 
+#' @export
 dwishArray_cpp <- function(Xarray, df, S, log_p = FALSE) {
     .Call(`_pcCov_dwishArray_cpp`, Xarray, df, S, log_p)
 }
