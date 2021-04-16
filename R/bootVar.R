@@ -3,6 +3,7 @@
 #' This function calculates block-bootstrap covariance matrix estimates and confidence intervals for partial correlations of a multivariate time series.
 #' @param ts \eqn{nt} x \eqn{p} matrix of the observed \eqn{p}-variate time series
 #' @param winLength Specified window length for block-bootstrap (Optional). If not specified, block-length is determined using the method described in Patton, Politis and White (2009).
+#' @param nboots Number of boot-strap samples
 #'
 #' @return A list of length 2 containing:
 #' \enumerate{

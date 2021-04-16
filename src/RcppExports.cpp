@@ -449,6 +449,34 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dwish_cpp
+double dwish_cpp(arma::mat X, int df, arma::mat S, bool log_p);
+RcppExport SEXP _pcCov_dwish_cpp(SEXP XSEXP, SEXP dfSEXP, SEXP SSEXP, SEXP log_pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type X(XSEXP);
+    Rcpp::traits::input_parameter< int >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< bool >::type log_p(log_pSEXP);
+    rcpp_result_gen = Rcpp::wrap(dwish_cpp(X, df, S, log_p));
+    return rcpp_result_gen;
+END_RCPP
+}
+// dwishArray_cpp
+double dwishArray_cpp(arma::cube Xarray, int df, arma::mat S, bool log_p);
+RcppExport SEXP _pcCov_dwishArray_cpp(SEXP XarraySEXP, SEXP dfSEXP, SEXP SSEXP, SEXP log_pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube >::type Xarray(XarraySEXP);
+    Rcpp::traits::input_parameter< int >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< bool >::type log_p(log_pSEXP);
+    rcpp_result_gen = Rcpp::wrap(dwishArray_cpp(Xarray, df, S, log_p));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_eigen2arma", (DL_FUNC) &_pcCov_eigen2arma, 1},
@@ -485,6 +513,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_listRoyVar_cpp", (DL_FUNC) &_pcCov_listRoyVar_cpp, 3},
     {"_pcCov_arrayRoyVar_cpp", (DL_FUNC) &_pcCov_arrayRoyVar_cpp, 3},
     {"_pcCov_royTest_cpp2", (DL_FUNC) &_pcCov_royTest_cpp2, 6},
+    {"_pcCov_dwish_cpp", (DL_FUNC) &_pcCov_dwish_cpp, 4},
+    {"_pcCov_dwishArray_cpp", (DL_FUNC) &_pcCov_dwishArray_cpp, 4},
     {NULL, NULL, 0}
 };
 

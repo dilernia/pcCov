@@ -2,6 +2,7 @@
 #include <iostream>
 #include <RcppArmadillo.h>
 #include <RcppEigen.h>
+#include <wishart.h>
 #include <cmath>
 
 // [[Rcpp::depends(RcppArmadillo, RcppEigen)]]
@@ -978,4 +979,31 @@ List royTest_cpp2(arma::field<arma::mat> y1, arma::field<arma::mat> y2, arma::ma
   );
 
   return(resList);
+}
+
+// [[Rcpp::depends(RcppArmadillo, RcppDist)]]
+
+// [[Rcpp::export]]
+double dwish_cpp(arma::mat X, int df, arma::mat S,
+             bool log_p = false) {
+
+  double ret = dwish(X = X, df = df, S = S, log_p = log_p);
+
+  return(ret);
+}
+
+// [[Rcpp::export]]
+double dwishArray_cpp(arma::cube Xarray, int df, arma::mat S,
+                 bool log_p = false) {
+
+  // Extracting dimensions
+  int K = Xarray.n_slices;
+  double ret = 0;
+
+  for (int k = 0; k < K; k++) {
+    arma::mat X = Xarray.slice(k);
+    ret = ret + dwish(X = X, df = df, S = S, log_p = log_p);
+  }
+
+  return(ret);
 }

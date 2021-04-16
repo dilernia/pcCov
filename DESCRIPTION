@@ -14,11 +14,13 @@ Imports:
     Rcpp,
     RcppArmadillo,
     RcppEigen,
+    RcppDist,
     np
 RoxygenNote: 7.1.1
 LinkingTo: 
     Rcpp,
     RcppArmadillo,
     RcppEigen,
+    RcppDist,
     np
 StagedInstall: false
