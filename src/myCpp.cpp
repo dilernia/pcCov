@@ -3,6 +3,7 @@
 #include <RcppArmadillo.h>
 #include <RcppEigen.h>
 #include <wishart.h>
+#include <mvnorm.h>
 #include <cmath>
 
 // [[Rcpp::depends(RcppArmadillo, RcppEigen)]]
@@ -10,6 +11,33 @@
 using namespace arma;
 using namespace Eigen;
 using namespace Rcpp;
+
+//' Adjust matrix to be symmetric
+//'
+//' @param myMat A matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @export
+// [[Rcpp::export]]
+arma::mat mkSymm_cpp(arma::mat myMat) {
+  arma::mat symmMat = (myMat + myMat.t()) / 2;
+  return symmMat;
+}
+
+//' Calculate inverse of matrix
+//'
+//' @param myMat A matrix.
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @export
+// [[Rcpp::export]]
+arma::mat inv_cpp(arma::mat myMat) {
+  return myMat.i();
+}
 
 //' Convert Eigen matrix to Arma matrix
 //'
@@ -1009,3 +1037,14 @@ double dwishArray_cpp(arma::cube Xarray, int df, arma::mat S,
 
   return(ret);
 }
+
+//' @export
+// [[Rcpp::export]]
+arma::vec dmvnorm_cpp(arma::mat x, arma::vec mu,
+                   arma::mat S, bool log_p = false) {
+
+  arma::vec ret = dmvnorm(x = x, mu = mu, S = S, log_p = log_p);
+
+  return(ret);
+}
+

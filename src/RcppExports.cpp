@@ -7,6 +7,28 @@
 
 using namespace Rcpp;
 
+// mkSymm_cpp
+arma::mat mkSymm_cpp(arma::mat myMat);
+RcppExport SEXP _pcCov_mkSymm_cpp(SEXP myMatSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type myMat(myMatSEXP);
+    rcpp_result_gen = Rcpp::wrap(mkSymm_cpp(myMat));
+    return rcpp_result_gen;
+END_RCPP
+}
+// inv_cpp
+arma::mat inv_cpp(arma::mat myMat);
+RcppExport SEXP _pcCov_inv_cpp(SEXP myMatSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type myMat(myMatSEXP);
+    rcpp_result_gen = Rcpp::wrap(inv_cpp(myMat));
+    return rcpp_result_gen;
+END_RCPP
+}
 // eigen2arma
 arma::mat eigen2arma(Eigen::MatrixXd eigen_A);
 RcppExport SEXP _pcCov_eigen2arma(SEXP eigen_ASEXP) {
@@ -477,8 +499,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// dmvnorm_cpp
+arma::vec dmvnorm_cpp(arma::mat x, arma::vec mu, arma::mat S, bool log_p);
+RcppExport SEXP _pcCov_dmvnorm_cpp(SEXP xSEXP, SEXP muSEXP, SEXP SSEXP, SEXP log_pSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type mu(muSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type S(SSEXP);
+    Rcpp::traits::input_parameter< bool >::type log_p(log_pSEXP);
+    rcpp_result_gen = Rcpp::wrap(dmvnorm_cpp(x, mu, S, log_p));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_pcCov_mkSymm_cpp", (DL_FUNC) &_pcCov_mkSymm_cpp, 1},
+    {"_pcCov_inv_cpp", (DL_FUNC) &_pcCov_inv_cpp, 1},
     {"_pcCov_eigen2arma", (DL_FUNC) &_pcCov_eigen2arma, 1},
     {"_pcCov_arma2eigen", (DL_FUNC) &_pcCov_arma2eigen, 1},
     {"_pcCov_eigenMult2", (DL_FUNC) &_pcCov_eigenMult2, 2},
@@ -515,6 +553,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_royTest_cpp2", (DL_FUNC) &_pcCov_royTest_cpp2, 6},
     {"_pcCov_dwish_cpp", (DL_FUNC) &_pcCov_dwish_cpp, 4},
     {"_pcCov_dwishArray_cpp", (DL_FUNC) &_pcCov_dwishArray_cpp, 4},
+    {"_pcCov_dmvnorm_cpp", (DL_FUNC) &_pcCov_dmvnorm_cpp, 4},
     {NULL, NULL, 0}
 };
 
