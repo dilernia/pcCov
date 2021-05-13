@@ -195,7 +195,7 @@ arma::mat corrMat_cpp(arma::mat tsData, bool partial = true) {
   }
 }
 
-// Function for Hann window taper
+//' Function for Hann window taper
 //'
 //' @param u Vector of indices for window
 //'
@@ -210,7 +210,7 @@ NumericVector cosTaper_cpp(IntegerVector u){
   return(sqrtRet * sqrtRet);
 }
 
-// Function for exponential window taper
+//' Function for exponential window taper
 //'
 //' @param u Vector of indices for window
 //'
@@ -225,7 +225,7 @@ NumericVector expTaper_cpp(IntegerVector u){
   return(ret);
 }
 
-// Calculate cross-covariance of two vectors
+//' Calculate cross-covariance of two vectors
 //'
 //' @param u Vector of indices for window
 //' @param ts1 First time series vector
@@ -249,7 +249,7 @@ double crossCov_cpp(int u, arma::vec ts1, arma::vec ts2) {
   }
 }
 
-// Calculate cross-covariance of two vectors
+//' Calculate cross-covariance of two vectors
 //'
 //' @param u Vector of indices for window
 //' @param ts1 First time series vector
@@ -276,7 +276,7 @@ arma::mat crossCov2_cpp(int u, arma::vec ts1, arma::vec ts2) {
   }
 }
 
-// Calculate taper for two vectors
+//' Calculate taper for two vectors
 //'
 //' @param ts1 First time series vector
 //' @param ts2 Second time series vector
@@ -322,7 +322,7 @@ arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
   return(sigma + sigma.t());
 }
 
-// Calculate taper for two vectors
+//' Calculate taper for two vectors
 //'
 //' @param ts1 First time series vector
 //' @param ts2 Second time series vector
@@ -368,7 +368,7 @@ arma::mat taperCovSub_cpp(arma::vec ts1, arma::vec ts2, int banw, arma::vec hu2s
   return(sigma + sigma.t());
 }
 
-// Calculate upper-triangular matrix
+//' Calculate upper-triangular matrix
 //'
 //' @param n Number of rows / columns of matrix
 //' @param x Values to fill upper-triangle with
@@ -397,9 +397,9 @@ arma::mat upperTriFill_cpp(int n, arma::vec x) {
   return(V);
 }
 
-//' Taylor Series Estimate of Covariance Matrix for Partial Correlations
+//' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
 //'
-//' This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
+//' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
 //'
 //' @param ts \eqn{nt} x \eqn{p} matrix of observed p-variate time series.
 //' @param bw nonnegative bandwidth parameter.
@@ -553,7 +553,7 @@ double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, NumericVe
   return(thetaHat_cpp(i, j, l, m, mvts, n, hu2s, ccMat) / sqrt(crossProd));
 }
 
-// Roy Asymptotic Variance
+//' Roy Asymptotic Variance
 //'
 //' @param iMat Matrix of correlation indices
 //' @param tsData Matrix of observed n-length p-variate time series
@@ -680,7 +680,7 @@ arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q) {
   return(ret);
 }
 
-// Construct Block-Diagonal Matrix
+//' Construct Block-Diagonal Matrix
 //'
 //' @param array3d 3D array of matrices to make into single block-diagonal matrix
 //'
@@ -787,6 +787,7 @@ arma::mat sigPsiInv_cpp(arma::cube sigmas, double sigVal, int qK, int q, int K) 
   return(sigPsiInv);
 }
 
+//' @export
 // [[Rcpp::export]]
 arma::field<arma::mat> arrayEigen_cpp(arma::cube array3d) {
 
@@ -850,7 +851,7 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
   return(XtSX);
 }
 
-// Variance Components Model using Roy (1989)'s Covariance Estimate
+//' Variance Components Model using Roy (1989)'s Covariance Estimate
 //'
 //' @param ys List of K matrices containing observed p-variate time series
 //' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)

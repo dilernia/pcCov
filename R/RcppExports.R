@@ -128,6 +128,7 @@ corrMat_cpp <- function(tsData, partial = TRUE) {
     .Call(`_pcCov_corrMat_cpp`, tsData, partial)
 }
 
+#' Function for Hann window taper
 #'
 #' @param u Vector of indices for window
 #'
@@ -139,6 +140,7 @@ cosTaper_cpp <- function(u) {
     .Call(`_pcCov_cosTaper_cpp`, u)
 }
 
+#' Function for exponential window taper
 #'
 #' @param u Vector of indices for window
 #'
@@ -150,6 +152,7 @@ expTaper_cpp <- function(u) {
     .Call(`_pcCov_expTaper_cpp`, u)
 }
 
+#' Calculate cross-covariance of two vectors
 #'
 #' @param u Vector of indices for window
 #' @param ts1 First time series vector
@@ -163,6 +166,7 @@ crossCov_cpp <- function(u, ts1, ts2) {
     .Call(`_pcCov_crossCov_cpp`, u, ts1, ts2)
 }
 
+#' Calculate cross-covariance of two vectors
 #'
 #' @param u Vector of indices for window
 #' @param ts1 First time series vector
@@ -176,6 +180,7 @@ crossCov2_cpp <- function(u, ts1, ts2) {
     .Call(`_pcCov_crossCov2_cpp`, u, ts1, ts2)
 }
 
+#' Calculate taper for two vectors
 #'
 #' @param ts1 First time series vector
 #' @param ts2 Second time series vector
@@ -189,6 +194,7 @@ taperCov_cpp <- function(ts1, ts2, banw) {
     .Call(`_pcCov_taperCov_cpp`, ts1, ts2, banw)
 }
 
+#' Calculate taper for two vectors
 #'
 #' @param ts1 First time series vector
 #' @param ts2 Second time series vector
@@ -203,6 +209,7 @@ taperCovSub_cpp <- function(ts1, ts2, banw, hu2s) {
     .Call(`_pcCov_taperCovSub_cpp`, ts1, ts2, banw, hu2s)
 }
 
+#' Calculate upper-triangular matrix
 #'
 #' @param n Number of rows / columns of matrix
 #' @param x Values to fill upper-triangle with
@@ -215,9 +222,9 @@ upperTriFill_cpp <- function(n, x) {
     .Call(`_pcCov_upperTriFill_cpp`, n, x)
 }
 
-#' Taylor Series Estimate of Covariance Matrix for Partial Correlations
+#' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
 #'
-#' This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
+#' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
 #'
 #' @param ts \eqn{nt} x \eqn{p} matrix of observed p-variate time series.
 #' @param bw nonnegative bandwidth parameter.
@@ -241,6 +248,7 @@ deltaHat_cpp <- function(i, j, l, m, mvts, n, hu2s, ccs, ccMat) {
     .Call(`_pcCov_deltaHat_cpp`, i, j, l, m, mvts, n, hu2s, ccs, ccMat)
 }
 
+#' Roy Asymptotic Variance
 #'
 #' @param iMat Matrix of correlation indices
 #' @param tsData Matrix of observed n-length p-variate time series
@@ -260,6 +268,7 @@ royVar2_cpp <- function(iMat, tsData, q) {
     .Call(`_pcCov_royVar2_cpp`, iMat, tsData, q)
 }
 
+#' Construct Block-Diagonal Matrix
 #'
 #' @param array3d 3D array of matrices to make into single block-diagonal matrix
 #'
@@ -293,6 +302,7 @@ sigPsiInv_cpp <- function(sigmas, sigVal, qK, q, K) {
     .Call(`_pcCov_sigPsiInv_cpp`, sigmas, sigVal, qK, q, K)
 }
 
+#' @export
 arrayEigen_cpp <- function(array3d) {
     .Call(`_pcCov_arrayEigen_cpp`, array3d)
 }
@@ -310,6 +320,7 @@ XtSX_cpp <- function(blocks, q, K) {
     .Call(`_pcCov_XtSX_cpp`, blocks, q, K)
 }
 
+#' Variance Components Model using Roy (1989)'s Covariance Estimate
 #'
 #' @param ys List of K matrices containing observed p-variate time series
 #' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)
