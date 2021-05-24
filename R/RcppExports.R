@@ -330,8 +330,7 @@ XtSX_cpp <- function(blocks, q, K) {
 #'
 #' @param rs column vector containing q x K unique marginal or partial correlations.
 #' @param sigmas 3D array of K estimated q x q covariance matrices for correlations.
-#' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
-#' @param sigMean q x q matrix containing element-wise average of sigmas.
+#' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas.
 #' @param delta Threshold for algorithm
 #' @param maxIters Maximum number of iterations for algorithm
 #' @param sig0 Initial value for sigma parameter
@@ -342,8 +341,8 @@ XtSX_cpp <- function(blocks, q, K) {
 #' @references Fiecas, M., Cribben, I., Bahktiari, R., and Cummine, J. (2017). A variance components model for statistical inference on functional connectivity networks. NeuroImage (Orlando, Fla.), 149, 256-266.
 #'
 #' @export
-royVcm_cpp <- function(rs, sigmas, sigEigs, sigMean, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
-    .Call(`_pcCov_royVcm_cpp`, rs, sigmas, sigEigs, sigMean, delta, maxIters, sig0)
+vcm_cpp <- function(rs, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
+    .Call(`_pcCov_vcm_cpp`, rs, sigmas, sigEigs, delta, maxIters, sig0)
 }
 
 listRoyVar_cpp <- function(ys, q, iMat) {

@@ -861,8 +861,7 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
 //'
 //' @param rs column vector containing q x K unique marginal or partial correlations.
 //' @param sigmas 3D array of K estimated q x q covariance matrices for correlations.
-//' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
-//' @param sigMean q x q matrix containing element-wise average of sigmas.
+//' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas.
 //' @param delta Threshold for algorithm
 //' @param maxIters Maximum number of iterations for algorithm
 //' @param sig0 Initial value for sigma parameter
@@ -874,14 +873,15 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
 //'
 //' @export
 // [[Rcpp::export]]
-List royVcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
-                 arma::mat sigMean, double delta = 0.001, int maxIters = 100, double sig0 = 0.10) {
+List vcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
+                 double delta = 0.001, int maxIters = 100, double sig0 = 0.10) {
 
   int K = sigmas.n_slices;
   int q = sigmas.slice(0).n_cols;
   int qK = q*K;
 
   arma::mat sigma = bdiagArray_cpp(sigmas);
+  arma::mat sigMean = arrayMean_cpp(sigmas);
 
   // Creating X diagonal design matrices for each subject
   arma::mat Xs = xMaker_cpp(K, q);
