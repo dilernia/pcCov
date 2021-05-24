@@ -337,6 +337,24 @@ royVcm_cpp <- function(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0
     .Call(`_pcCov_royVcm_cpp`, ys, sigmas, sigEigs, delta, maxIters, sig0)
 }
 
+#' Variance Components Model
+#'
+#' @param rs column vector containing q x K unique correlations.
+#' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)
+#' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
+#' @param sigMean q x q matrix containing element-wise average of sigmas.
+#' @param delta Threshold for algorithm
+#' @param maxIters Maximum number of iterations for algorithm
+#' @param sig0 Initial value for sigma parameter
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @export
+royVcm2_cpp <- function(rs, sigmas, sigEigs, sigMean, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
+    .Call(`_pcCov_royVcm2_cpp`, rs, sigmas, sigEigs, sigMean, delta, maxIters, sig0)
+}
+
 listRoyVar_cpp <- function(ys, q, iMat) {
     .Call(`_pcCov_listRoyVar_cpp`, ys, q, iMat)
 }

@@ -943,6 +943,90 @@ List royVcm_cpp(arma::field<arma::mat> ys, arma::cube sigmas, arma::field<arma::
   return(resList);
 }
 
+//' Variance Components Model
+//'
+//' @param rs column vector containing q x K unique correlations.
+//' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)
+//' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
+//' @param sigMean q x q matrix containing element-wise average of sigmas.
+//' @param delta Threshold for algorithm
+//' @param maxIters Maximum number of iterations for algorithm
+//' @param sig0 Initial value for sigma parameter
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @export
+// [[Rcpp::export]]
+List royVcm2_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
+                 arma::mat sigMean, double delta = 0.001, int maxIters = 100, double sig0 = 0.10) {
+
+  int K = sigmas.n_slices;
+  int q = sigmas.slice(0).n_cols;
+  int qK = q*K;
+
+  arma::mat sigma = bdiagArray_cpp(sigmas);
+
+  // Creating X diagonal design matrices for each subject
+  arma::mat Xs = xMaker_cpp(K, q);
+
+  // Initializing Psi matrix to be diagonal with sig0
+  arma::mat iqK = eye<mat>(qK, qK);
+  arma::mat psi = iqK*sig0;
+  arma::cube sigPsiInvBlks(q, q, K);
+  arma::mat XtSX(q, q);
+  arma::vec beta(q);
+  arma::vec resVec(qK);
+  arma::mat thetaMat(q, q);
+  arma::mat diffMat(q, q);
+  double sigVal = sig0;
+
+  // Variables for convergence
+  double epsilon = 1;
+  int counter = 0;
+  arma::vec betaOld(q);
+
+  // Iterate until convergence
+  while(epsilon > delta && counter < maxIters) {
+
+    counter = counter + 1;
+
+    // Updating beta
+    sigPsiInvBlks = sigPsiInvBlks_cpp(sigEigs, sigVal, q, K);
+    XtSX = XtSX_cpp(sigPsiInvBlks, q, K);
+    beta = solve(XtSX, Xs.t() * bdiagArray_cpp(sigPsiInvBlks) * rs);
+
+    // Updating residual vector
+    resVec = rs - Xs * beta;
+
+    // Updating theta matrix
+    thetaMat = arrayMean_cpp(thetaUpdate_cpp(resVec, K, q));
+
+    // Updating diagonal Psi matrix
+    diffMat = thetaMat - sigMean;
+    sigVal = mean(diffMat.diag());
+    psi = iqK*sigVal;
+
+    // Convergence variables
+    epsilon = max(abs(beta - betaOld));
+    betaOld = beta;
+  }
+
+  // Calculating beta covariance estimate
+  sigPsiInvBlks = sigPsiInvBlks_cpp(sigEigs, sigVal, q, K);
+  XtSX = XtSX_cpp(sigPsiInvBlks, q, K);
+  arma::mat betaCov = arma::inv(XtSX);
+
+  List resList = List::create(
+    _["beta"] = beta,
+    _["betaCov"] = betaCov,
+    _["sigma"] = sigma,
+    _["psi"] = psi
+  );
+
+  return(resList);
+}
+
 // [[Rcpp::export]]
 arma::cube listRoyVar_cpp(arma::field<arma::mat> ys, int q, arma::mat iMat) {
 
