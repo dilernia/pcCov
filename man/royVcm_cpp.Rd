@@ -2,16 +2,26 @@
 % Please edit documentation in R/RcppExports.R
 \name{royVcm_cpp}
 \alias{royVcm_cpp}
-\title{Variance Components Model using Roy (1989)'s Covariance Estimate}
+\title{Variance Components Model}
 \usage{
-royVcm_cpp(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.1)
+royVcm_cpp(
+  rs,
+  sigmas,
+  sigEigs,
+  sigMean,
+  delta = 0.001,
+  maxIters = 100L,
+  sig0 = 0.1
+)
 }
 \arguments{
-\item{ys}{List of K matrices containing observed p-variate time series}
+\item{rs}{column vector containing q x K unique marginal or partial correlations.}
 
-\item{sigmas}{3D array of K estimated q x q covariance matrices where q = choose(p, 2)}
+\item{sigmas}{3D array of K estimated q x q covariance matrices for correlations.}
 
 \item{sigEigs}{List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas}
+
+\item{sigMean}{q x q matrix containing element-wise average of sigmas.}
 
 \item{delta}{Threshold for algorithm}
 
@@ -20,7 +30,10 @@ royVcm_cpp(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.1)
 \item{sig0}{Initial value for sigma parameter}
 }
 \description{
-Variance Components Model using Roy (1989)'s Covariance Estimate
+This function implements the a variance components model proposed by Fiecas et al. (2017).
+}
+\references{
+Fiecas, M., Cribben, I., Bahktiari, R., and Cummine, J. (2017). A variance components model for statistical inference on functional connectivity networks. NeuroImage (Orlando, Fla.), 149, 256-266.
 }
 \author{
 Andrew DiLernia

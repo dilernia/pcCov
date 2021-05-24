@@ -414,24 +414,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // royVcm_cpp
-List royVcm_cpp(arma::field<arma::mat> ys, arma::cube sigmas, arma::field<arma::mat> sigEigs, double delta, int maxIters, double sig0);
-RcppExport SEXP _pcCov_royVcm_cpp(SEXP ysSEXP, SEXP sigmasSEXP, SEXP sigEigsSEXP, SEXP deltaSEXP, SEXP maxItersSEXP, SEXP sig0SEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::field<arma::mat> >::type ys(ysSEXP);
-    Rcpp::traits::input_parameter< arma::cube >::type sigmas(sigmasSEXP);
-    Rcpp::traits::input_parameter< arma::field<arma::mat> >::type sigEigs(sigEigsSEXP);
-    Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< int >::type maxIters(maxItersSEXP);
-    Rcpp::traits::input_parameter< double >::type sig0(sig0SEXP);
-    rcpp_result_gen = Rcpp::wrap(royVcm_cpp(ys, sigmas, sigEigs, delta, maxIters, sig0));
-    return rcpp_result_gen;
-END_RCPP
-}
-// royVcm2_cpp
-List royVcm2_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs, arma::mat sigMean, double delta, int maxIters, double sig0);
-RcppExport SEXP _pcCov_royVcm2_cpp(SEXP rsSEXP, SEXP sigmasSEXP, SEXP sigEigsSEXP, SEXP sigMeanSEXP, SEXP deltaSEXP, SEXP maxItersSEXP, SEXP sig0SEXP) {
+List royVcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs, arma::mat sigMean, double delta, int maxIters, double sig0);
+RcppExport SEXP _pcCov_royVcm_cpp(SEXP rsSEXP, SEXP sigmasSEXP, SEXP sigEigsSEXP, SEXP sigMeanSEXP, SEXP deltaSEXP, SEXP maxItersSEXP, SEXP sig0SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -442,7 +426,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
     Rcpp::traits::input_parameter< int >::type maxIters(maxItersSEXP);
     Rcpp::traits::input_parameter< double >::type sig0(sig0SEXP);
-    rcpp_result_gen = Rcpp::wrap(royVcm2_cpp(rs, sigmas, sigEigs, sigMean, delta, maxIters, sig0));
+    rcpp_result_gen = Rcpp::wrap(royVcm_cpp(rs, sigmas, sigEigs, sigMean, delta, maxIters, sig0));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -564,8 +548,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_eigen_cpp", (DL_FUNC) &_pcCov_eigen_cpp, 1},
     {"_pcCov_sigPsiInvBlks_cpp", (DL_FUNC) &_pcCov_sigPsiInvBlks_cpp, 4},
     {"_pcCov_XtSX_cpp", (DL_FUNC) &_pcCov_XtSX_cpp, 3},
-    {"_pcCov_royVcm_cpp", (DL_FUNC) &_pcCov_royVcm_cpp, 6},
-    {"_pcCov_royVcm2_cpp", (DL_FUNC) &_pcCov_royVcm2_cpp, 7},
+    {"_pcCov_royVcm_cpp", (DL_FUNC) &_pcCov_royVcm_cpp, 7},
     {"_pcCov_listRoyVar_cpp", (DL_FUNC) &_pcCov_listRoyVar_cpp, 3},
     {"_pcCov_arrayRoyVar_cpp", (DL_FUNC) &_pcCov_arrayRoyVar_cpp, 3},
     {"_pcCov_royTest_cpp2", (DL_FUNC) &_pcCov_royTest_cpp2, 6},

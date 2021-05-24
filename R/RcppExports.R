@@ -248,12 +248,16 @@ deltaHat_cpp <- function(i, j, l, m, mvts, n, hu2s, ccs, ccMat) {
     .Call(`_pcCov_deltaHat_cpp`, i, j, l, m, mvts, n, hu2s, ccs, ccMat)
 }
 
-#' Roy Asymptotic Variance
+#' @title Roy Asymptotic Variance
+#'
+#' @description This function calculates the asymptotic covariance matrix for correlations of a stationary multivariate time series as derived by Roy (1989).
 #'
 #' @param iMat Matrix of correlation indices
 #' @param tsData Matrix of observed n-length p-variate time series
 #' @param q Integer equal to the number of unique variables pairs given by choose(p, 2)
 #' @param bw Bandwidth parameter
+#'
+#' @references Roy, R. (1989). Asymptotic covariance structure of serial correlations in multivariate time series. Biometrika, 76(4), 824-827.
 #'
 #' @author
 #' Andrew DiLernia
@@ -320,27 +324,12 @@ XtSX_cpp <- function(blocks, q, K) {
     .Call(`_pcCov_XtSX_cpp`, blocks, q, K)
 }
 
-#' Variance Components Model using Roy (1989)'s Covariance Estimate
+#' @title Variance Components Model
 #'
-#' @param ys List of K matrices containing observed p-variate time series
-#' @param sigmas 3D array of K estimated q x q covariance matrices where q = choose(p, 2)
-#' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
-#' @param delta Threshold for algorithm
-#' @param maxIters Maximum number of iterations for algorithm
-#' @param sig0 Initial value for sigma parameter
+#' @description This function implements the a variance components model proposed by Fiecas et al. (2017).
 #'
-#' @author
-#' Andrew DiLernia
-#'
-#' @export
-royVcm_cpp <- function(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
-    .Call(`_pcCov_royVcm_cpp`, ys, sigmas, sigEigs, delta, maxIters, sig0)
-}
-
-#' Variance Components Model
-#'
-#' @param rs column vector containing q x K unique correlations.
-#' @param sigmas 3D array of K estimated q x q covariance matrices where q = choose(p, 2)
+#' @param rs column vector containing q x K unique marginal or partial correlations.
+#' @param sigmas 3D array of K estimated q x q covariance matrices for correlations.
 #' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
 #' @param sigMean q x q matrix containing element-wise average of sigmas.
 #' @param delta Threshold for algorithm
@@ -350,9 +339,11 @@ royVcm_cpp <- function(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0
 #' @author
 #' Andrew DiLernia
 #'
+#' @references Fiecas, M., Cribben, I., Bahktiari, R., and Cummine, J. (2017). A variance components model for statistical inference on functional connectivity networks. NeuroImage (Orlando, Fla.), 149, 256-266.
+#'
 #' @export
-royVcm2_cpp <- function(rs, sigmas, sigEigs, sigMean, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
-    .Call(`_pcCov_royVcm2_cpp`, rs, sigmas, sigEigs, sigMean, delta, maxIters, sig0)
+royVcm_cpp <- function(rs, sigmas, sigEigs, sigMean, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
+    .Call(`_pcCov_royVcm_cpp`, rs, sigmas, sigEigs, sigMean, delta, maxIters, sig0)
 }
 
 listRoyVar_cpp <- function(ys, q, iMat) {

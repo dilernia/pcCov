@@ -16,7 +16,10 @@ royVar_cpp(iMat, tsData, q, bw = 10L)
 \item{bw}{Bandwidth parameter}
 }
 \description{
-Roy Asymptotic Variance
+This function calculates the asymptotic covariance matrix for correlations of a stationary multivariate time series as derived by Roy (1989).
+}
+\references{
+Roy, R. (1989). Asymptotic covariance structure of serial correlations in multivariate time series. Biometrika, 76(4), 824-827.
 }
 \author{
 Andrew DiLernia

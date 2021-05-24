@@ -553,12 +553,16 @@ double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, NumericVe
   return(thetaHat_cpp(i, j, l, m, mvts, n, hu2s, ccMat) / sqrt(crossProd));
 }
 
-//' Roy Asymptotic Variance
+//' @title Roy Asymptotic Variance
+//'
+//' @description This function calculates the asymptotic covariance matrix for correlations of a stationary multivariate time series as derived by Roy (1989).
 //'
 //' @param iMat Matrix of correlation indices
 //' @param tsData Matrix of observed n-length p-variate time series
 //' @param q Integer equal to the number of unique variables pairs given by choose(p, 2)
 //' @param bw Bandwidth parameter
+//'
+//' @references Roy, R. (1989). Asymptotic covariance structure of serial correlations in multivariate time series. Biometrika, 76(4), 824-827.
 //'
 //' @author
 //' Andrew DiLernia
@@ -851,102 +855,12 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
   return(XtSX);
 }
 
-//' Variance Components Model using Roy (1989)'s Covariance Estimate
+//' @title Variance Components Model
 //'
-//' @param ys List of K matrices containing observed p-variate time series
-//' @param sigmas 3D array of K estimated q x q covariance matrices where q = choose(p, 2)
-//' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
-//' @param delta Threshold for algorithm
-//' @param maxIters Maximum number of iterations for algorithm
-//' @param sig0 Initial value for sigma parameter
+//' @description This function implements the a variance components model proposed by Fiecas et al. (2017).
 //'
-//' @author
-//' Andrew DiLernia
-//'
-//' @export
-// [[Rcpp::export]]
-List royVcm_cpp(arma::field<arma::mat> ys, arma::cube sigmas, arma::field<arma::mat> sigEigs,
-                double delta = 0.001, int maxIters = 100, double sig0 = 0.10) {
-
-  int K = ys.size();
-  int nvars = ys[0].n_cols;
-  int q = R::choose(nvars, 2);
-  int qK = q*K;
-
-  // Obtaining vector of unique partial correlations
-  arma::mat rs(qK, 1);
-  for(int i = 0; i < K; ++i)
-  {
-    rs.rows(i*q, i*q + q-1) = upperTri_cpp(corrMat_cpp(ys(i)));
-  }
-
-  arma::mat sigma = bdiagArray_cpp(sigmas);
-  arma::mat sigMean = arrayMean_cpp(sigmas);
-
-  // Creating X diagonal design matrices for each subject
-  arma::mat Xs = xMaker_cpp(K, q);
-
-  // Initializing Psi matrix to be diagonal with sig0
-  arma::mat iqK = eye<mat>(qK, qK);
-  arma::mat psi = iqK*sig0;
-  arma::cube sigPsiInvBlks(q, q, K);
-  arma::mat XtSX(q, q);
-  arma::vec beta(q);
-  arma::vec resVec(qK);
-  arma::mat thetaMat(q, q);
-  arma::mat diffMat(q, q);
-  double sigVal = sig0;
-
-  // Variables for convergence
-  double epsilon = 1;
-  int counter = 0;
-  arma::vec betaOld(q);
-
-  // Iterate until convergence
-  while(epsilon > delta && counter < maxIters) {
-
-    counter = counter + 1;
-
-    // Updating beta
-    sigPsiInvBlks = sigPsiInvBlks_cpp(sigEigs, sigVal, q, K);
-    XtSX = XtSX_cpp(sigPsiInvBlks, q, K);
-    beta = solve(XtSX, Xs.t() * bdiagArray_cpp(sigPsiInvBlks) * rs);
-
-    // Updating residual vector
-    resVec = rs - Xs * beta;
-
-    // Updating theta matrix
-    thetaMat = arrayMean_cpp(thetaUpdate_cpp(resVec, K, q));
-
-    // Updating diagonal Psi matrix
-    diffMat = thetaMat - sigMean;
-    sigVal = mean(diffMat.diag());
-    psi = iqK*sigVal;
-
-    // Convergence variables
-    epsilon = max(abs(beta - betaOld));
-    betaOld = beta;
-  }
-
-  // Calculating beta covariance estimate
-  sigPsiInvBlks = sigPsiInvBlks_cpp(sigEigs, sigVal, q, K);
-  XtSX = XtSX_cpp(sigPsiInvBlks, q, K);
-  arma::mat betaCov = arma::inv(XtSX);
-
-  List resList = List::create(
-    _["beta"] = beta,
-    _["betaCov"] = betaCov,
-    _["sigma"] = sigma,
-    _["psi"] = psi
-  );
-
-  return(resList);
-}
-
-//' Variance Components Model
-//'
-//' @param rs column vector containing q x K unique correlations.
-//' @param sigmas 3D array of K estimated q x q covariance matrices where q = choose(p, 2)
+//' @param rs column vector containing q x K unique marginal or partial correlations.
+//' @param sigmas 3D array of K estimated q x q covariance matrices for correlations.
 //' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
 //' @param sigMean q x q matrix containing element-wise average of sigmas.
 //' @param delta Threshold for algorithm
@@ -956,9 +870,11 @@ List royVcm_cpp(arma::field<arma::mat> ys, arma::cube sigmas, arma::field<arma::
 //' @author
 //' Andrew DiLernia
 //'
+//' @references Fiecas, M., Cribben, I., Bahktiari, R., and Cummine, J. (2017). A variance components model for statistical inference on functional connectivity networks. NeuroImage (Orlando, Fla.), 149, 256-266.
+//'
 //' @export
 // [[Rcpp::export]]
-List royVcm2_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
+List royVcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
                  arma::mat sigMean, double delta = 0.001, int maxIters = 100, double sig0 = 0.10) {
 
   int K = sigmas.n_slices;
