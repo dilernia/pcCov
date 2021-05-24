@@ -323,7 +323,7 @@ XtSX_cpp <- function(blocks, q, K) {
 #' Variance Components Model using Roy (1989)'s Covariance Estimate
 #'
 #' @param ys List of K matrices containing observed p-variate time series
-#' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)
+#' @param sigmas 3D array of K estimated q x q covariance matrices where q = choose(p, 2)
 #' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
 #' @param delta Threshold for algorithm
 #' @param maxIters Maximum number of iterations for algorithm
@@ -340,7 +340,7 @@ royVcm_cpp <- function(ys, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0
 #' Variance Components Model
 #'
 #' @param rs column vector containing q x K unique correlations.
-#' @param sigmas 3D array of K estimated q by q covariance matrices where q = choose(p, 2)
+#' @param sigmas 3D array of K estimated q x q covariance matrices where q = choose(p, 2)
 #' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas
 #' @param sigMean q x q matrix containing element-wise average of sigmas.
 #' @param delta Threshold for algorithm
