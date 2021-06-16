@@ -34,7 +34,7 @@ bootRes <- bootVar(myTS)
 
 }
 \references{
-Politis, D.N. and H. White (2004), "Automatic block-length selection for the dependent bootstrap", Econometric Reviews 23(1), 53-70.
+Politis, D.N. and H. White (2004), Automatic block-length selection for the dependent bootstrap, \emph{Econometric Reviews}, 23(1), 53-70.
 }
 \author{
 Andrew DiLernia

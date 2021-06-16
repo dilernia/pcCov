@@ -2,9 +2,9 @@
 % Please edit documentation in R/pcCovHelper.R
 \name{royVar}
 \alias{royVar}
-\title{Roy's Asymptotic Covariance Matrix for Correlation}
+\title{Roy's Asymptotic Covariance Matrix for Marginal Correlations}
 \usage{
-royVar(ts, partial = TRUE, bw = NULL)
+royVar(ts, partial = FALSE, bw = NULL)
 }
 \arguments{
 \item{ts}{\eqn{nt} x \eqn{p} matrix of the observed \eqn{p}-variate time series}
@@ -14,10 +14,11 @@ royVar(ts, partial = TRUE, bw = NULL)
 \item{bw}{Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).}
 }
 \value{
-\eqn{q} x \eqn{q} asymptotic covariance matrix where \eqn{q=}choose(\eqn{p}, 2) if partial = TRUE, \eqn{p} x \eqn{p} asymptotic covariance matrix if partial = FALSE
+\eqn{q} x \eqn{q} asymptotic covariance matrix where \eqn{q=}choose(\eqn{p}, 2).
+For covariance estimator for partial correlations partial = TRUE, for covariance estimator for marginal correlations partial = FALSE.
 }
 \description{
-This function calculates Roy (1989)'s asymptotic covariance matrix for marginal or partial correlations
+This function calculates Roy (1989)'s asymptotic covariance matrix for marginal or partial correlations.
 }
 \examples{
 # Generate multivariate time series with 5 variables from a
@@ -30,10 +31,10 @@ royVar(myTS, partial = TRUE)
 
 }
 \references{
-Roy, R. (1989). "Asymptotic Covariance Structure of Serial Correlations in
-Multivariate Time Series", Biometrika, 76(4), 824-827.
+Roy, R. (1989). Asymptotic covariance structure of serial correlations in
+multivariate time series, \emph{Biometrika}, 76(4), 824-827.
 
-Politis, D.N. and H. White (2004), "Automatic block-length selection for the dependent bootstrap", Econometric Reviews 23(1), 53-70.
+Politis, D.N. and H. White (2004), Automatic block-length selection for the dependent bootstrap, \emph{Econometric Reviews}, 23(1), 53-70.
 }
 \author{
 Andrew DiLernia

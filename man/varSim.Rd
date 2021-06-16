@@ -2,7 +2,7 @@
 % Please edit documentation in R/pcCovHelper.R
 \name{varSim}
 \alias{varSim}
-\title{Simulate Data from a First-Order VAR Model}
+\title{Simulate Data from a VAR Model}
 \usage{
 varSim(nt, coeffMat, covMat)
 }
@@ -11,7 +11,7 @@ varSim(nt, coeffMat, covMat)
 
 \item{coeffMat}{\eqn{p} x \eqn{p} matrix of coefficients}
 
-\item{covMat}{\eqn{nt} x \eqn{nt} covariance matrix of residuals.}
+\item{covMat}{\eqn{p} x \eqn{p} covariance matrix of residuals}
 }
 \value{
 \eqn{nt} x \eqn{p} matrix of the generated \eqn{p}-variate time series

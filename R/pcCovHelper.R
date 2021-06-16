@@ -1,9 +1,9 @@
-#' Simulate Data from a First-Order VAR Model
+#' Simulate Data from a VAR Model
 #'
 #' This function simulates data from a mean 0 first-order vector auto-regressive (VAR) model.
 #' @param nt Number of observations
 #' @param coeffMat \eqn{p} x \eqn{p} matrix of coefficients
-#' @param covMat \eqn{nt} x \eqn{nt} covariance matrix of residuals.
+#' @param covMat \eqn{p} x \eqn{p} covariance matrix of residuals
 #' @return \eqn{nt} x \eqn{p} matrix of the generated \eqn{p}-variate time series
 #'
 #' @author
@@ -20,16 +20,12 @@
 #' xlab = "Time", ylab = "Value")
 #'
 #' @export
-varSim <- function(nt, coeffMat, covMat) {
-
-  # First generating errors for all variables for all t
+varSim <- function (nt, coeffMat, covMat) {
   wts <- MASS::mvrnorm(n = nt, mu = rep(0, ncol(covMat)), Sigma = covMat)
-
-  # Generating y values sequentially
   ys <- matrix(0, nrow = nt, ncol = ncol(covMat))
   ys[1, ] <- wts[1, ]
-  for(r in 2:nt) {
-    ys[r, ] <- t(coeffMat %*% ys[r-1, ]) + wts[r, ]
+  for (r in 2:nt) {
+    ys[r, ] <- t(coeffMat %*% ys[r - 1, ]) + wts[r, ]
   }
   return(ys)
 }
@@ -108,13 +104,14 @@ testStat <- function(cMat, royCov) {
   return(t(num12) %*% solve(denom, num12))
 }
 
-#' Roy's Asymptotic Covariance Matrix for Correlation
+#' Roy's Asymptotic Covariance Matrix for Marginal Correlations
 #'
-#' This function calculates Roy (1989)'s asymptotic covariance matrix for marginal or partial correlations
+#' This function calculates Roy (1989)'s asymptotic covariance matrix for marginal or partial correlations.
 #' @param ts \eqn{nt} x \eqn{p} matrix of the observed \eqn{p}-variate time series
 #' @param partial Logical. Calculate the asymptotic covariance matrix for the partial correlations (TRUE) or marginal correlations (FALSE)
 #' @param bw Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).
-#' @return \eqn{q} x \eqn{q} asymptotic covariance matrix where \eqn{q=}choose(\eqn{p}, 2) if partial = TRUE, \eqn{p} x \eqn{p} asymptotic covariance matrix if partial = FALSE
+#' @return \eqn{q} x \eqn{q} asymptotic covariance matrix where \eqn{q=}choose(\eqn{p}, 2).
+#' For covariance estimator for partial correlations partial = TRUE, for covariance estimator for marginal correlations partial = FALSE.
 #'
 #' @author
 #' Andrew DiLernia
@@ -129,13 +126,13 @@ testStat <- function(cMat, royCov) {
 #' royVar(myTS, partial = TRUE)
 #'
 #' @references
-#' Roy, R. (1989). "Asymptotic Covariance Structure of Serial Correlations in
-#' Multivariate Time Series", Biometrika, 76(4), 824-827.
+#' Roy, R. (1989). Asymptotic covariance structure of serial correlations in
+#' multivariate time series, \emph{Biometrika}, 76(4), 824-827.
 #'
-#' Politis, D.N. and H. White (2004), "Automatic block-length selection for the dependent bootstrap", Econometric Reviews 23(1), 53-70.
+#' Politis, D.N. and H. White (2004), Automatic block-length selection for the dependent bootstrap, \emph{Econometric Reviews}, 23(1), 53-70.
 #'
 #' @export
-royVar <- function(ts, partial = TRUE, bw = NULL) {
+royVar <- function(ts, partial = FALSE, bw = NULL) {
   # Number of variables and observations
   p <- ncol(ts)
   N <- nrow(ts)
@@ -165,4 +162,41 @@ royVar <- function(ts, partial = TRUE, bw = NULL) {
     pcCovHat <- royVar_cpp(iMat = iMate, tsData = ts, q = q, bw = bw)
   }
   return(pcCovHat)
+}
+
+#' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
+#'
+#' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a stationary Gaussian process.
+#'
+#' @param ts \eqn{nt} x \eqn{p} matrix of observed p-variate time series.
+#' @param bw Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @examples
+#' # Generate multivariate time series with 5 variables from a
+#' # first-order VAR model with 50 time points
+#' set.seed(1994)
+#' myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
+#'
+#' # Asymptotic covariance matrix for partial correlations
+#' partialCov(ts = myTS)
+#'
+#' @references
+#' Politis, D.N. and H. White (2004), Automatic block-length selection for the dependent bootstrap, \emph{Econometric Reviews}, 23(1), 53-70.
+#'
+#' @export
+partialCov <- function(ts, bw = NULL) {
+  p <- ncol(ts)
+  q <- choose(p, 2)
+  indMat <- pcCov::royVarhelper(p)
+  indMate <- pcCov::royVarhelper(p, errors = T)
+  iMatq <- unique(indMat[, 1:2])
+
+  # Selecting optimal bandwidth if unspecified
+  if(is.null(bw)) {
+    bw <- ceiling(mean(np::b.star(ts)[, 1]))
+  }
+  return(pcCov::partialCov_cpp(ts = ts, bw = bw, iMatq = iMatq, iMate = indMate, q = q))
 }
