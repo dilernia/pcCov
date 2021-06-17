@@ -103,215 +103,192 @@ Examples
 
 Here we will walk through brief examples of using some key functions.
 
-### Inference of correlations for time series data
+Demonstration of using pcCov
+================
 
-First, we simulate data from a first-order autoregressive (AR(1)) model for demonstration
-purposes.
+## Simulate multivariate time series data
+
+First, we simulate data from a first-order autoregressive (AR(1)) model
+for demonstration purposes.
 
 ``` r
-library(tidyverse)
-library(stepDetect)
+library(pcCov)
 
-# Display help files
-?featureEngineer
-?machineLearn
+# Number of variables (p), AR correlation parameter (phi), 
+# length of time series (N), all true partial correlations being 0 or not (allZero)
+p <- 8
+phi <- 0.50
+N <- 200
+allZero <- FALSE
 
-# Simulating activity data set
+# Generating true precision matrix
 set.seed(1994)
-tsLength <- 200
-aTime <- Sys.time()
-simData <- data.frame(start_time = round(seq(from = aTime, to = aTime + tsLength*60 - 1, by = 60), "mins"),
-                      end_time = round(seq(from = aTime, to = aTime + tsLength*60 - 1, by = 60), "mins") + 60,
-                      steps = as.numeric(rpois(n = tsLength, lambda = 30)*rbinom(n = tsLength, size = 1, prob = 0.80)))
+q <- choose(p, 2)
+precMat <- diag(0.50, p)
+triInds <- upper.tri(diag(p))
+precMat[triInds] <- sample(c(-0.30, 0, 0.30), size = q, replace = T) * (!allZero)
 
-# Artificially creating true labels
-simData$Activity <- sapply(simData$steps / max(simData$steps), FUN = function(x) {
-  sample(c("Walking", "Other"), size = 1, prob = c(x, 1 - x))
-})
+precMat <-  precMat + t(precMat)
+
+# Making sure still positive definite
+eVals <- eigen(precMat)$values
+if(any(eVals <= 0)) {
+  precMat <- precMat + diag(abs(min(eVals)) + 0.001, p)
+}
+
+# True covariance and correlation matrices
+pc0Mat <- invCov2part_cpp(precMat)
+colnames(pc0Mat) <- rownames(pc0Mat) <- paste0("V", 1:p)
+
+pc0s <- pc0Mat[triInds]
+cvMat <- solve(precMat)
+
+r0Mat <- cov2cor(cvMat)
+r0s <- r0Mat[triInds]
+colnames(r0Mat) <- rownames(r0Mat) <- paste0("V", 1:p)
+
+# Generating data from AR model
+myTS <- scale(varSim(nt = N, coeffMat = diag(p)*phi, 
+                       covMat = cvMat))
 ```
 
-We can visualize this simulated data set using ggplot:
+We can visualize this simulated data set:
 
 ``` r
-library(ggridges)
-
-# Visualizing artificial step count data
-ggplot(simData, aes(x = start_time, y = steps)) +
-    geom_point() + labs(title = "Simulated Step Count Data", x = "", y = "Steps per Minute") + theme_bw() +
-    theme(legend.position = "none")
+# Plotting generated time series
+matplot(myTS, type = 'l', lty = "solid", 
+        main = "Generated Multivariate Time Series",
+        xlab = "Time", ylab = "Value")
 ```
+
+<img src="pcCov-Demo_files/figure-gfm/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
+
+Next, we calculate the partial correlations for the artificial data set
+and see how similar they are to the true correlations.
 
 ``` r
-# Visualizing accelerometer data
-simData %>% ggplot(aes(y = Activity, x = steps)) +
-  geom_density_ridges(alpha = 0.8) +
-  labs(y = "Activity", x = "", title = "Step Counts by Activity") + 
-  theme_bw() + theme(axis.text.x = element_blank(),
-                     axis.ticks.x = element_blank())
+library(ggplot2)
+library(ggcorrplot)
+library(grid)
+library(tidyverse)
+
+# Empirical partial correlations
+pcMat <- corrMat_cpp(tsData = myTS, partial = TRUE)
+pcEsts <- pcMat[triInds]
+colnames(pcMat) <- rownames(pcMat) <- paste0("V", 1:p)
+
+# Creating common plot function
+corrPlot <- function(corrMatrix, myTitle) {
+  ggcorrplot::ggcorrplot(corrMatrix, method = "circle", type = "upper") + 
+  scale_fill_gradient2(high = "#D55E00", low = "#0072B2", mid = "white",
+                       limits=c(-1,1), breaks = seq(-1, 1, by = 0.25)) + 
+  labs(x = "", y = "", fill = "Correlation", title = myTitle) + 
+    theme_bw() + theme(legend.key.height = unit(1, "cm"), text = element_text(face = "bold"),
+      axis.text.y = element_text(size = 8, face = "bold"),
+      axis.text.x = element_text(size = 8, face = "bold", angle = 45),
+      plot.title = element_text(size = 15, face = "bold"))
+}
+
+# Plot for partial correlations
+pcPlot <- corrPlot(pcMat, myTitle = "Empirical Partial Correlations") %>% ggplot2::ggplotGrob()
+pc0Plot <- corrPlot(pc0Mat, myTitle = "True Partial Correlations") %>% ggplot2::ggplotGrob()
+
+pc0Plot$heights <- pcPlot$heights
+pc0Plot$widths <- pcPlot$widths
+
+grid::grid.draw(cbind(pcPlot, pc0Plot))
 ```
 
-    ## Picking joint bandwidth of 3.44
+<img src="pcCov-Demo_files/figure-gfm/unnamed-chunk-3-1.png" style="display: block; margin: auto;" />
 
-Next, let’s construct some features for fitting our machine learning
-models based on the univariate step counts across time. We consider 7
-different time-domain functions of rolling windows of the step counts,
-and two different window-lengths in total. We also are constructing 8
-different frequency domain features (in this case discrete wavelet
-features) for our machine learning models as well.
+## Inference of partial correlations for time series data
+
+Now, we use an asymptotic covariance estimator based on a second-order
+Taylor Series expansion and properties of quadratic forms of
+multivariate normal random vectors. For demonstration purposes, we
+construct 95% Wald confidence intervals for each of the *p*(*p* − 1)/2=
+28 partial correlations.
 
 ``` r
-# Functions to apply to rolling window
-myFuns <- setNames(list(mean, max, min, sd, IQR,
-                        PerformanceAnalytics::skewness,
-                        function(x, na.rm){sum(x * 1:length(x)) / sum((1:length(x))^2)}),
-                   c("mean", "max", "min", "sd", "iqr", "skew", "slope"))
+# Calculating asymptotic covariance estimator for partial correlations w/
+# finite sample correction
+pcCov <- partialCov(ts = myTS) / (N - p) * N
 
-# Creating new features
-designData <- featureEngineer(steps = simData$steps, funs = myFuns, winLengths = c(3, 4), waves = 8) %>%
-  dplyr::mutate(Activity = simData$Activity)
+# Taylor confidence intervals
+zstar <- qnorm(0.975)
+indvCIs <- cbind(pcEsts - zstar * sqrt(diag(pcCov)), 
+                 pcEsts + zstar * sqrt(diag(pcCov)))
+
+# Capture rate
+capRate <- mean(sapply(1:q, FUN = function(j) {
+  (pc0s[j] >= indvCIs[j, 1]) && (pc0s[j] <= indvCIs[j, 2])}))
+
+capRate
 ```
 
-We can then visualize some of our newly constructed features.
+    ## [1] 0.9642857
+
+We can also calculate 95% confidence intervals using a block-bootstrap
+approach.
 
 ``` r
-# Visualizing rolling statistics
-winl <- 3
-designData %>% pivot_longer(cols = contains(paste0("_", winl)), names_to = "variable", values_to = "value") %>%
-  ggplot(aes(y = Activity, x = steps)) +
-  geom_density_ridges(alpha = 0.8) +
-  facet_grid(cols = vars(variable), scales = "free_y") +
-  labs(y = "Activity", x = "", title = "Rolling Statistics by Activity",
-       subtitle = paste0("Window Length of ", winl, " Minutes")) + 
-  theme_bw() + theme(axis.text.x = element_blank(),
-        axis.ticks.x = element_blank())
+# Optimal bandwidth
+banw <- ceiling(mean(np::b.star(myTS)[, 1]))
+
+# Block-Bootstrap intervals
+bootSummary <- bootVar(ts = myTS, banw)
+bootCIs <- bootSummary[[2]]
+
+# Block-bootstrap intervals
+bootCapRate <- mean(sapply(1:q, FUN = function(j) {
+  (pc0s[j] >= bootCIs[j, 1]) && (pc0s[j] <= bootCIs[j, 2])}))
+
+bootCapRate
 ```
 
-    ## Picking joint bandwidth of 3.44
-    ## Picking joint bandwidth of 3.44
-    ## Picking joint bandwidth of 3.44
-    ## Picking joint bandwidth of 3.44
-    ## Picking joint bandwidth of 3.44
-    ## Picking joint bandwidth of 3.44
-    ## Picking joint bandwidth of 3.44
+    ## [1] 0.9642857
 
-Then, using our constructed features we fit several different models: a
-first-order elastic net penalized logistic regression model, a
-second-order elastic net penalized logistic regression model, and a
-regularized random forest model. For each of these models, we can
-implement a Synthetic Minority Over-sampling TEchnique (SMOTE) or
-reweighting of observations for improved sensitivity of detecting
-exercise sessions when class imbalance in the data is present.
+## Inference of marginal correlations for time series data
+
+Through a similar process, we can also conduct inference of marginal
+correlations using Roy (1989)’s covariance estimator.
 
 ``` r
-# Instantiating list for model results
-myMods <- list()
+# Empirical marginal correlations
+rMat <- corrMat_cpp(tsData = myTS, partial = FALSE)
+rEsts <- rMat[triInds]
+colnames(rMat) <- rownames(rMat) <- paste0("V", 1:p)
 
-# Unadjusted
+# Plot for marginal correlations
+rPlot <- corrPlot(rMat, myTitle = "Empirical Marginal Correlations") %>% ggplot2::ggplotGrob()
+r0Plot <- corrPlot(r0Mat, myTitle = "True Marginal Correlations") %>% ggplot2::ggplotGrob()
 
-# Fitting 1st-order elastic net model
-myMods$modelRes1 <- machineLearn(designData = designData, model = "glmnet",
-                         nfolds = 5, secOrder = FALSE, ncores = 1, smote = FALSE)
+r0Plot$heights <- rPlot$heights
+r0Plot$widths <- rPlot$widths
 
-# Fitting 2nd-order elastic net model
-myMods$modelRes2 <- machineLearn(designData = designData, model = "glmnet",
-                         nfolds = 5, secOrder = TRUE, ncores = 1, smote = FALSE)
-
-# Fitting 1st-order elastic net model
-myMods$modelResRRF <- machineLearn(designData = designData, model = "RRF",
-                         nfolds = 5, secOrder = FALSE, ncores = 1, smote = FALSE)
+grid::grid.draw(cbind(rPlot, r0Plot))
 ```
 
-    ## Registered S3 method overwritten by 'RRF':
-    ##   method      from        
-    ##   plot.margin randomForest
+<img src="pcCov-Demo_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
 
 ``` r
-# SMOTE
+# Calculating asymptotic covariance estimator for marginal correlations
+rCov <- royVar(ts = myTS, partial = FALSE)
 
-# Fitting 1st-order elastic net model w/ SMOTE
-myMods$modelResSMOTE1 <- machineLearn(designData = designData, model = "glmnet",
-                         nfolds = 5, secOrder = FALSE, ncores = 1, smote = TRUE)
+# Taylor confidence intervals
+zstar <- qnorm(0.975)
+rindvCIs <- cbind(rEsts - zstar * sqrt(diag(rCov)), 
+                 rEsts + zstar * sqrt(diag(rCov)))
 
-# Fitting 2nd-order elastic net model w/ SMOTE
-myMods$modelResSMOTE2 <- machineLearn(designData = designData, model = "glmnet",
-                         nfolds = 5, secOrder = TRUE, ncores = 1, smote = TRUE)
+# Capture rate
+rcapRate <- mean(sapply(1:q, FUN = function(j) {
+  (r0s[j] >= rindvCIs[j, 1]) && (r0s[j] <= rindvCIs[j, 2])}))
 
-# Fitting 1st-order elastic net model w/ SMOTE
-myMods$modelResSMOTERRF <- machineLearn(designData = designData, model = "RRF",
-                         nfolds = 5, secOrder = FALSE, ncores = 1, smote = TRUE)
-
-# Reweighting
-
-# Fitting 1st-order elastic net model
-myMods$modelResRW1 <- machineLearn(designData = designData, model = "glmnet", reweighted = TRUE,
-                         nfolds = 5, secOrder = FALSE, ncores = 1, smote = FALSE)
-
-# Fitting 2nd-order elastic net model
-myMods$modelResRW2 <- machineLearn(designData = designData, model = "glmnet", reweighted = TRUE,
-                         nfolds = 5, secOrder = TRUE, ncores = 1, smote = FALSE)
-
-# Fitting 1st-order elastic net model
-myMods$modelResRWRRF <- machineLearn(designData = designData, model = "RRF", reweighted = TRUE,
-                         nfolds = 5, secOrder = FALSE, ncores = 1, smote = FALSE)
+rcapRate
 ```
 
-Let’s look at the most important features for each model by creating a
-grid of feature importance plots using the `importancePlot()` function.
-The first column contains the 1st-order elastic net models, the second
-column the 2nd-order elastic net models, and the third column the random
-forest models. The first row contains the unadjusted models, the second
-row the SMOTE models, and the third row the reweighted models.
+    ## [1] 0.9642857
 
-``` r
-lapply(1:3, FUN = function(m) {
-    lapply(myMods[(1 + (m-1)*3):(3*m)], FUN = function(modelRes){
-      modelRes[[1]] %>% importancePlot() %>% ggplot2::ggplotGrob()}) %>% 
-        do.call(what = 'cbind')}) %>% do.call(what = 'rbind') %>% grid::grid.draw()
-```
-
-Now let’s look at the confusion matrix plots for each model. For this
-artificial data set, the random forest models fit the data perfectly.
-
-``` r
-# Obtain predictions for each model
-modelPreds <- lapply(myMods, FUN = function(m) {
-  data.frame(prob = predict(m[[1]], m[[1]][["trainingData"]], type = "prob")[, c("Walking")]) %>% 
-    mutate(estActivity = ifelse(prob >= 0.50, "Walking", "Other"),
-           Activity = m[[1]][["trainingData"]][[".outcome"]])
-  })
-
-# Plotting confusion matrix plots
-lapply(1:3, FUN = function(m) {
-    lapply(modelPreds[(1 + (m-1)*3):(3*m)], FUN = function(modelPred){
-      mygg <- modelPred %>% confusionPlot() 
-      mygg[[2]] %>% ggplot2::ggplotGrob()}) %>% 
-        do.call(what = 'cbind')}) %>% do.call(what = 'rbind') %>% grid::grid.draw()
-```
-
-### Threshold Algorithm
-
-Let’s also implement the threshold algorithm for detection of walking
-for physical activity of Mays et al. (2020).
-
-``` r
-# Implementing exercise detection algorithm
-algResults <- threshAlg(steps = simData$steps, thresh = "adaptive")
-
-algResults[[1]] %>% mutate(Activity = simData$Activity) %>% confusionPlot()
-```
-
-    ## [[1]]
-    ## NULL
-    ## 
-    ## [[2]]
-
-We can also display the estimated and true activities across time using
-the `activityPlot()` function.
-
-``` r
-# Plotting true and estimated activities
-simData %>% mutate(estActivity = algResults[[1]]$estActivity) %>% activityPlot()
-```
 
 <h2 id="refs">
 

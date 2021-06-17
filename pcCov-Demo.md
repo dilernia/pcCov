@@ -11,7 +11,7 @@ library(pcCov)
 
 # Number of variables (p), AR correlation parameter (phi), 
 # length of time series (N), all true partial correlations being 0 or not (allZero)
-p <- 10
+p <- 8
 phi <- 0.50
 N <- 200
 allZero <- FALSE
@@ -35,10 +35,11 @@ if(any(eVals <= 0)) {
 pc0Mat <- invCov2part_cpp(precMat)
 colnames(pc0Mat) <- rownames(pc0Mat) <- paste0("V", 1:p)
 
-pc0s <- -pc0Mat[triInds]
+pc0s <- pc0Mat[triInds]
 cvMat <- solve(precMat)
 
 r0Mat <- cov2cor(cvMat)
+r0s <- r0Mat[triInds]
 colnames(r0Mat) <- rownames(r0Mat) <- paste0("V", 1:p)
 
 # Generating data from AR model
@@ -57,7 +58,7 @@ matplot(myTS, type = 'l', lty = "solid",
 
 <img src="pcCov-Demo_files/figure-gfm/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
 
-Next, we calculate the partial correlations for the artificial data set,
+Next, we calculate the partial correlations for the artificial data set
 and see how similar they are to the true correlations.
 
 ``` r
@@ -68,15 +69,16 @@ library(tidyverse)
 
 # Empirical partial correlations
 pcMat <- corrMat_cpp(tsData = myTS, partial = TRUE)
+pcEsts <- pcMat[triInds]
 colnames(pcMat) <- rownames(pcMat) <- paste0("V", 1:p)
 
 # Creating common plot function
 corrPlot <- function(corrMatrix, myTitle) {
   ggcorrplot::ggcorrplot(corrMatrix, method = "circle", type = "upper") + 
   scale_fill_gradient2(high = "#D55E00", low = "#0072B2", mid = "white",
-                       limits=c(-1,1), breaks = seq(-1, 1, by = 0.20)) + 
+                       limits=c(-1,1), breaks = seq(-1, 1, by = 0.25)) + 
   labs(x = "", y = "", fill = "Correlation", title = myTitle) + 
-    theme_bw() + theme(legend.key.height = unit(1.9, "cm"), text = element_text(face = "bold"),
+    theme_bw() + theme(legend.key.height = unit(1, "cm"), text = element_text(face = "bold"),
       axis.text.y = element_text(size = 8, face = "bold"),
       axis.text.x = element_text(size = 8, face = "bold", angle = 45),
       plot.title = element_text(size = 15, face = "bold"))
@@ -100,11 +102,56 @@ Now, we use an asymptotic covariance estimator based on a second-order
 Taylor Series expansion and properties of quadratic forms of
 multivariate normal random vectors. For demonstration purposes, we
 construct 95% Wald confidence intervals for each of the *p*(*p* − 1)/2=
-45 partial correlations.
+28 partial correlations.
+
+``` r
+# Calculating asymptotic covariance estimator for partial correlations w/
+# finite sample correction
+pcCov <- partialCov(ts = myTS) / (N - p) * N
+
+# Taylor confidence intervals
+zstar <- qnorm(0.975)
+indvCIs <- cbind(pcEsts - zstar * sqrt(diag(pcCov)), 
+                 pcEsts + zstar * sqrt(diag(pcCov)))
+
+# Capture rate
+capRate <- mean(sapply(1:q, FUN = function(j) {
+  (pc0s[j] >= indvCIs[j, 1]) && (pc0s[j] <= indvCIs[j, 2])}))
+
+capRate
+```
+
+    ## [1] 0.9642857
+
+We can also calculate 95% confidence intervals using a block-bootstrap
+approach.
+
+``` r
+# Optimal bandwidth
+banw <- ceiling(mean(np::b.star(myTS)[, 1]))
+
+# Block-Bootstrap intervals
+bootSummary <- bootVar(ts = myTS, banw)
+bootCIs <- bootSummary[[2]]
+
+# Block-bootstrap intervals
+bootCapRate <- mean(sapply(1:q, FUN = function(j) {
+  (pc0s[j] >= bootCIs[j, 1]) && (pc0s[j] <= bootCIs[j, 2])}))
+
+bootCapRate
+```
+
+    ## [1] 0.9642857
+
+## Inference of marginal correlations for time series data
+
+Through a similar process, we can also conduct inference of marginal
+correlations using Roy (1989)’s covariance estimator.
 
 ``` r
 # Empirical marginal correlations
 rMat <- corrMat_cpp(tsData = myTS, partial = FALSE)
+rEsts <- rMat[triInds]
 colnames(rMat) <- rownames(rMat) <- paste0("V", 1:p)
 
 # Plot for marginal correlations
@@ -117,4 +164,22 @@ r0Plot$widths <- rPlot$widths
 grid::grid.draw(cbind(rPlot, r0Plot))
 ```
 
-<img src="pcCov-Demo_files/figure-gfm/unnamed-chunk-4-1.png" style="display: block; margin: auto;" />
+<img src="pcCov-Demo_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
+
+``` r
+# Calculating asymptotic covariance estimator for marginal correlations
+rCov <- royVar(ts = myTS, partial = FALSE)
+
+# Taylor confidence intervals
+zstar <- qnorm(0.975)
+rindvCIs <- cbind(rEsts - zstar * sqrt(diag(rCov)), 
+                 rEsts + zstar * sqrt(diag(rCov)))
+
+# Capture rate
+rcapRate <- mean(sapply(1:q, FUN = function(j) {
+  (r0s[j] >= rindvCIs[j, 1]) && (r0s[j] <= rindvCIs[j, 2])}))
+
+rcapRate
+```
+
+    ## [1] 0.9642857

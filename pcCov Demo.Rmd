@@ -68,9 +68,9 @@ matplot(myTS, type = 'l', lty = "solid",
         xlab = "Time", ylab = "Value")
 ```
 
-Next, we calculate the partial correlations for the artificial data set, and see how similar they are to the true correlations.
+Next, we calculate the partial correlations for the artificial data set and see how similar they are to the true correlations.
 
-```{r, fig.height=10, fig.width=12, fig.align = "center"}
+```{r, fig.height=4, fig.width=9, fig.align = "center"}
 library(ggplot2)
 library(ggcorrplot)
 library(grid)
@@ -85,9 +85,9 @@ colnames(pcMat) <- rownames(pcMat) <- paste0("V", 1:p)
 corrPlot <- function(corrMatrix, myTitle) {
   ggcorrplot::ggcorrplot(corrMatrix, method = "circle", type = "upper") + 
   scale_fill_gradient2(high = "#D55E00", low = "#0072B2", mid = "white",
-                       limits=c(-1,1), breaks = seq(-1, 1, by = 0.20)) + 
+                       limits=c(-1,1), breaks = seq(-1, 1, by = 0.25)) + 
   labs(x = "", y = "", fill = "Correlation", title = myTitle) + 
-    theme_bw() + theme(legend.key.height = unit(1.9, "cm"), text = element_text(face = "bold"),
+    theme_bw() + theme(legend.key.height = unit(1, "cm"), text = element_text(face = "bold"),
       axis.text.y = element_text(size = 8, face = "bold"),
       axis.text.x = element_text(size = 8, face = "bold", angle = 45),
       plot.title = element_text(size = 15, face = "bold"))
@@ -145,7 +145,7 @@ bootCapRate
 
 Through a similar process, we can also conduct inference of marginal correlations using Roy (1989)'s covariance estimator.
 
-```{r, fig.height=10, fig.width=12, fig.align = "center"}
+```{r, fig.height=4, fig.width=9, fig.align = "center"}
 # Empirical marginal correlations
 rMat <- corrMat_cpp(tsData = myTS, partial = FALSE)
 rEsts <- rMat[triInds]
