@@ -51,7 +51,7 @@ Overview of main functions
 </tr>
 <tr class="even">
 <td><code>vcm_cpp</code></td>
-<td>Implements the a variance components model proposed by Fiecas et al. (2017).</td>
+<td>Implements the variance components model proposed by Fiecas et al. (2017).</td>
 </tr>
 <tr class="odd">
 <td><code>varSim</code></td>
