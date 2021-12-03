@@ -35,11 +35,11 @@ Overview of main functions
 <tbody>
 <tr class="even">
 <td><code>partialCov</code></td>
-<td>Calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a stationary Gaussian process.</td>
+<td>Calculates a second-order Taylor Series estimate of the covariance matrix for the empirical partial correlations of a stationary multivariate Gaussian time series.</td>
 </tr>
 <tr class="odd">
 <td><code>bootVar</code></td>
-<td>Calculates block-bootstrap covariance matrix estimates and confidence intervals for partial correlations of a multivariate time series.</td>
+<td>Calculates block-bootstrap covariance matrix estimates and confidence intervals for the empirical partial correlations of a multivariate time series.</td>
 </tr>
 <tr class="even">
 <td><code>royVar</code></td>
@@ -54,26 +54,22 @@ Overview of main functions
 <td>Implements the variance components model proposed by Fiecas et al. (2017).</td>
 </tr>
 <tr class="odd">
-<td><code>varSim</code></td>
-<td>Simulates data from a mean 0 first-order vector auto-regressive (VAR) model.</td>
-</tr>
-<tr class="even">
 <td><code>corrMat_cpp</code></td>
 <td>Calculates marginal or partial correlation matrix.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>varSim</code></td>
 <td>Simulates data from a mean 0 first-order vector auto-regressive (VAR) model.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>invCov2part_cpp</code></td>
 <td>Calculates partial correlation matrix from the inverse-covariance matrix.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code>bdiagArray_cpp</code></td>
 <td>Constructs a block-diagonal matrix from a 3D array.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code>eigenMult2</code></td>
 <td>Efficiently multiplies two matrices. Similar functions are available for 3 (`eigenMult3`) and 4 (`eigenMult4`) matrices.</td>
 </tr>
