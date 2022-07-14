@@ -1,10 +1,10 @@
 # pcCov
 
-Inference of Partial Correlations for Multivariate Time Series
+Inference of Partial Correlations for Multivariate Gaussian Time Series
 
 ## Description
 
-This R package implements methods for inference of partial correlations for a stationary and ergodic Gaussian process. Methods of inference are based on second-order Taylor Series approximation of the covariances of the partial correlations.
+This R package implements methods for inference of partial correlations of a second-order stationary multivariate Gaussian time series. Methods of inference are based on second-order Taylor Series approximation and properties of quadratic forms of multivariate normal vectors.
 
 </p>
 
@@ -35,7 +35,7 @@ Overview of main functions
 <tbody>
 <tr class="even">
 <td><code>partialCov</code></td>
-<td>Calculates a second-order Taylor Series estimate of the covariance matrix for the empirical partial correlations of a stationary multivariate Gaussian time series.</td>
+<td>Calculates an estimate of the covariance matrix for the empirical partial correlations of a stationary multivariate Gaussian time series based on a second-order Taylor Series approximation.</td>
 </tr>
 <tr class="odd">
 <td><code>bootVar</code></td>
@@ -102,7 +102,7 @@ Here we will walk through brief examples of using some key functions.
 Demonstration of using pcCov
 ================
 
-## Simulate multivariate time series data
+## Simulate multivariate gaussian time series data
 
 First, we simulate data from a first-order autoregressive (AR(1)) model
 for demonstration purposes.
@@ -243,48 +243,6 @@ bootCapRate
 ```
 
     ## [1] 0.9642857
-
-## Inference of marginal correlations for time series data
-
-Through a similar process, we can also conduct inference of marginal
-correlations using Roy (1989)’s covariance estimator.
-
-``` r
-# Empirical marginal correlations
-rMat <- corrMat_cpp(tsData = myTS, partial = FALSE)
-rEsts <- rMat[triInds]
-colnames(rMat) <- rownames(rMat) <- paste0("V", 1:p)
-
-# Plot for marginal correlations
-rPlot <- corrPlot(rMat, myTitle = "Empirical Marginal Correlations") %>% ggplot2::ggplotGrob()
-r0Plot <- corrPlot(r0Mat, myTitle = "True Marginal Correlations") %>% ggplot2::ggplotGrob()
-
-r0Plot$heights <- rPlot$heights
-r0Plot$widths <- rPlot$widths
-
-grid::grid.draw(cbind(rPlot, r0Plot))
-```
-
-<img src="pcCov-Demo_files/figure-gfm/unnamed-chunk-6-1.png" style="display: block; margin: auto;" />
-
-``` r
-# Calculating asymptotic covariance estimator for marginal correlations
-rCov <- royVar(ts = myTS, partial = FALSE)
-
-# Taylor confidence intervals
-zstar <- qnorm(0.975)
-rindvCIs <- cbind(rEsts - zstar * sqrt(diag(rCov)), 
-                 rEsts + zstar * sqrt(diag(rCov)))
-
-# Capture rate
-rcapRate <- mean(sapply(1:q, FUN = function(j) {
-  (r0s[j] >= rindvCIs[j, 1]) && (r0s[j] <= rindvCIs[j, 2])}))
-
-rcapRate
-```
-
-    ## [1] 0.9642857
-
 
 <h2 id="refs">
 
