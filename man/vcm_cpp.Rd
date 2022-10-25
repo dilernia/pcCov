@@ -15,7 +15,7 @@ vcm_cpp(
 )
 }
 \arguments{
-\item{rs}{column vector containing q x K unique marginal or partial correlations.}
+\item{rs}{Column vector containing q x K unique marginal or partial correlations.}
 
 \item{sigmas}{3D array of K estimated q x q covariance matrices for correlations.}
 
@@ -26,6 +26,11 @@ vcm_cpp(
 \item{maxIters}{Maximum number of iterations for algorithm}
 
 \item{sig0}{Initial value for sigma parameter}
+
+\item{smallRet}{Logical value, whether or not to return smaller set of results}
+}
+\value{
+List of length 4 containing beta (q x 1), betaCov (q x q), sigma (qK x qK), and psi (qK x qK) estimates. If smallRet = true, then only returns beta and betaCov.
 }
 \description{
 This function implements the a variance components model proposed by Fiecas et al. (2017).

@@ -117,8 +117,10 @@ cov2corr_cpp <- function(cmat) {
 
 #' Calculate marginal or partial correlation matrix
 #'
-#' @param tsData A data matrix.
+#' @param tsData An n x p data matrix.
 #' @param partial Logical. Whether to calculate partial (TRUE) or marginal (FALSE) correlation matrix
+#'
+#' @return p x p correlation matrix
 #'
 #' @author
 #' Andrew DiLernia
@@ -230,7 +232,9 @@ upperTriFill_cpp <- function(n, x) {
 #' @param bw nonnegative bandwidth parameter.
 #' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
 #' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = T).
-#' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
+#' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
+#'
+#' @return \eqn{q} x \eqn{q} covariance matrix
 #'
 #' @author
 #' Andrew DiLernia
@@ -257,6 +261,8 @@ deltaHat_cpp <- function(i, j, l, m, mvts, n, hu2s, ccs, ccMat) {
 #' @param q Integer equal to the number of unique variables pairs given by choose(p, 2)
 #' @param bw Bandwidth parameter
 #'
+#' @return q x q covariance matrix
+#'
 #' @references Roy, R. (1989). Asymptotic covariance structure of serial correlations in multivariate time series. Biometrika, 76(4), 824-827.
 #'
 #' @author
@@ -274,7 +280,9 @@ royVar2_cpp <- function(iMat, tsData, q) {
 
 #' Construct Block-Diagonal Matrix
 #'
-#' @param array3d 3D array of matrices to make into single block-diagonal matrix
+#' @param array3d An n x p x k 3D array of matrices to make into a single block-diagonal matrix
+#'
+#' @return kn x kp block-diagonal matrix
 #'
 #' @author
 #' Andrew DiLernia
@@ -328,12 +336,15 @@ XtSX_cpp <- function(blocks, q, K) {
 #'
 #' @description This function implements the a variance components model proposed by Fiecas et al. (2017).
 #'
-#' @param rs column vector containing q x K unique marginal or partial correlations.
+#' @param rs Column vector containing q x K unique marginal or partial correlations.
 #' @param sigmas 3D array of K estimated q x q covariance matrices for correlations.
 #' @param sigEigs List of K matrices containing eigen decomposition matrices for covariance matrices contained in sigmas.
 #' @param delta Threshold for algorithm
 #' @param maxIters Maximum number of iterations for algorithm
 #' @param sig0 Initial value for sigma parameter
+#' @param smallRet Logical value, whether or not to return smaller set of results
+#'
+#' @return List of length 4 containing beta (q x 1), betaCov (q x q), sigma (qK x qK), and psi (qK x qK) estimates. If smallRet = true, then only returns beta and betaCov.
 #'
 #' @author
 #' Andrew DiLernia

@@ -15,7 +15,10 @@ partialCov_cpp(ts, bw, iMatq, iMate, q)
 
 \item{iMate}{matrix of indices for partial correlations equal to royVarhelper(p, errors = T).}
 
-\item{q}{number of unique partial correlations equal to choose(\eqn{p}, 2).}
+\item{\eqn{q}}{number of unique partial correlations equal to choose(\eqn{p}, 2).}
+}
+\value{
+\eqn{q} x \eqn{q} covariance matrix
 }
 \description{
 This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.

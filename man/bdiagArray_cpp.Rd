@@ -7,7 +7,10 @@
 bdiagArray_cpp(array3d)
 }
 \arguments{
-\item{array3d}{3D array of matrices to make into single block-diagonal matrix}
+\item{array3d}{An n x p x k 3D array of matrices to make into a single block-diagonal matrix}
+}
+\value{
+kn x kp block-diagonal matrix
 }
 \description{
 Construct Block-Diagonal Matrix

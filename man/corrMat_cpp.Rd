@@ -7,9 +7,12 @@
 corrMat_cpp(tsData, partial = TRUE)
 }
 \arguments{
-\item{tsData}{A data matrix.}
+\item{tsData}{An n x p data matrix.}
 
 \item{partial}{Logical. Whether to calculate partial (TRUE) or marginal (FALSE) correlation matrix}
+}
+\value{
+p x p correlation matrix
 }
 \description{
 Calculate marginal or partial correlation matrix

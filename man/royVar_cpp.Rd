@@ -15,6 +15,9 @@ royVar_cpp(iMat, tsData, q, bw = 10L)
 
 \item{bw}{Bandwidth parameter}
 }
+\value{
+q x q covariance matrix
+}
 \description{
 This function calculates the asymptotic covariance matrix for correlations of a stationary multivariate time series as derived by Roy (1989).
 }
