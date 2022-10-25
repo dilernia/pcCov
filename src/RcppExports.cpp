@@ -7,6 +7,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // mkSymm_cpp
 arma::mat mkSymm_cpp(arma::mat myMat);
 RcppExport SEXP _pcCov_mkSymm_cpp(SEXP myMatSEXP) {
@@ -414,8 +419,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // vcm_cpp
-List vcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs, double delta, int maxIters, double sig0);
-RcppExport SEXP _pcCov_vcm_cpp(SEXP rsSEXP, SEXP sigmasSEXP, SEXP sigEigsSEXP, SEXP deltaSEXP, SEXP maxItersSEXP, SEXP sig0SEXP) {
+List vcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs, double delta, int maxIters, double sig0, bool smallRet);
+RcppExport SEXP _pcCov_vcm_cpp(SEXP rsSEXP, SEXP sigmasSEXP, SEXP sigEigsSEXP, SEXP deltaSEXP, SEXP maxItersSEXP, SEXP sig0SEXP, SEXP smallRetSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -425,7 +430,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
     Rcpp::traits::input_parameter< int >::type maxIters(maxItersSEXP);
     Rcpp::traits::input_parameter< double >::type sig0(sig0SEXP);
-    rcpp_result_gen = Rcpp::wrap(vcm_cpp(rs, sigmas, sigEigs, delta, maxIters, sig0));
+    Rcpp::traits::input_parameter< bool >::type smallRet(smallRetSEXP);
+    rcpp_result_gen = Rcpp::wrap(vcm_cpp(rs, sigmas, sigEigs, delta, maxIters, sig0, smallRet));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -547,7 +553,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_eigen_cpp", (DL_FUNC) &_pcCov_eigen_cpp, 1},
     {"_pcCov_sigPsiInvBlks_cpp", (DL_FUNC) &_pcCov_sigPsiInvBlks_cpp, 4},
     {"_pcCov_XtSX_cpp", (DL_FUNC) &_pcCov_XtSX_cpp, 3},
-    {"_pcCov_vcm_cpp", (DL_FUNC) &_pcCov_vcm_cpp, 6},
+    {"_pcCov_vcm_cpp", (DL_FUNC) &_pcCov_vcm_cpp, 7},
     {"_pcCov_listRoyVar_cpp", (DL_FUNC) &_pcCov_listRoyVar_cpp, 3},
     {"_pcCov_arrayRoyVar_cpp", (DL_FUNC) &_pcCov_arrayRoyVar_cpp, 3},
     {"_pcCov_royTest_cpp2", (DL_FUNC) &_pcCov_royTest_cpp2, 6},

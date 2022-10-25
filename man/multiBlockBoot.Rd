@@ -2,35 +2,31 @@
 % Please edit documentation in R/hierarchicalFuns.R
 \name{multiBlockBoot}
 \alias{multiBlockBoot}
-\title{Multi-Subject Block-Bootstrap for Partial Correlations of a Multivariate Time Series}
+\title{Multi-Subject Block-Bootstrap for Multivariate Time Series}
 \usage{
 multiBlockBoot(mvts, winLength = NULL, nboots = 500)
 }
 \arguments{
-\item{mvts}{List of \eqn{K} number of \eqn{nt} x \eqn{p} matrices of the observed \eqn{p}-variate time series, or \eqn{N} x \eqn{p} x \eqn{K} array.}
+\item{mvts}{List of \eqn{K} number of \eqn{nt} x \eqn{p} matrices of the observed \eqn{p}-variate time series.}
 
 \item{winLength}{Specified window length for block-bootstrap (Optional). If not specified, block-length is determined using the method described in Patton, Politis and White (2009).}
 
 \item{nboots}{Number of bootstrap samples.}
 }
 \value{
-A list of length 2 containing:
-\enumerate{
-\item \eqn{q} x \eqn{q} estimated covariance matrix of the partial correlations where \eqn{q=}choose(\eqn{p}, 2)
-\item \eqn{q} x \eqn{2} matrix containing the lower (first column) and upper (second column) bounds of the 95\% bootstrap confidence intervals.
-}
+A list of \eqn{K} arrays containing block-bootstrap samples.
 }
 \description{
-This function calculates block-bootstrap covariance matrix estimates for partial correlations of multi-subject time series data.
+This function obtains block-bootstrap samples for multi-subject time series data.
 }
 \examples{
-# Generate multivariate time series with 5 variables from a
-# first-order VAR model with 50 time points
+# Generate multivariate time series for 10 subjects with 5 variables from a
+# first-order VAR model with 100 time points
 set.seed(1994)
-myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
+multiSubjTS <- lapply(1:10, FUN = function(subj) {pcCov::varSim(nt = 100, coeffMat = diag(0.50, 5), covMat = diag(1, 5))})
 
-# Estimated covariance matrix for partial correlations and 95\% bootstrap intervals
-bootRes <- bootVar(myTS)
+# Obtain 1000 block-bootstrap samples for each subject
+bootRes <- multiBlockBoot(mvts = multiSubjTS, nboots = 1000)
 
 }
 \references{

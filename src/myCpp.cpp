@@ -874,7 +874,7 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
 //' @export
 // [[Rcpp::export]]
 List vcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
-                 double delta = 0.001, int maxIters = 100, double sig0 = 0.10) {
+                 double delta = 0.001, int maxIters = 100, double sig0 = 0.10, bool smallRet = false) {
 
   int K = sigmas.n_slices;
   int q = sigmas.slice(0).n_cols;
@@ -939,6 +939,21 @@ List vcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
     _["sigma"] = sigma,
     _["psi"] = psi
   );
+
+  // Returning full or partial results to help with RAM issues
+  if(smallRet) {
+    List resList = List::create(
+      _["beta"] = beta,
+      _["betaCov"] = betaCov
+    );
+  } else {
+    List resList = List::create(
+      _["beta"] = beta,
+      _["betaCov"] = betaCov,
+      _["sigma"] = sigma,
+      _["psi"] = psi
+    );
+  }
 
   return(resList);
 }

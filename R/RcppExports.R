@@ -341,8 +341,8 @@ XtSX_cpp <- function(blocks, q, K) {
 #' @references Fiecas, M., Cribben, I., Bahktiari, R., and Cummine, J. (2017). A variance components model for statistical inference on functional connectivity networks. NeuroImage (Orlando, Fla.), 149, 256-266.
 #'
 #' @export
-vcm_cpp <- function(rs, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.10) {
-    .Call(`_pcCov_vcm_cpp`, rs, sigmas, sigEigs, delta, maxIters, sig0)
+vcm_cpp <- function(rs, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.10, smallRet = FALSE) {
+    .Call(`_pcCov_vcm_cpp`, rs, sigmas, sigEigs, delta, maxIters, sig0, smallRet)
 }
 
 listRoyVar_cpp <- function(ys, q, iMat) {

@@ -4,7 +4,15 @@
 \alias{vcm_cpp}
 \title{Variance Components Model}
 \usage{
-vcm_cpp(rs, sigmas, sigEigs, delta = 0.001, maxIters = 100L, sig0 = 0.1)
+vcm_cpp(
+  rs,
+  sigmas,
+  sigEigs,
+  delta = 0.001,
+  maxIters = 100L,
+  sig0 = 0.1,
+  smallRet = FALSE
+)
 }
 \arguments{
 \item{rs}{column vector containing q x K unique marginal or partial correlations.}
