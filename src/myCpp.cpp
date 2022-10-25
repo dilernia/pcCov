@@ -865,7 +865,7 @@ arma::mat XtSX_cpp(arma::cube blocks, int q, int K) {
 
 //' @title Variance Components Model
 //'
-//' @description This function implements the a variance components model proposed by Fiecas et al. (2017).
+//' @description This function implements the variance components model proposed by Fiecas et al. (2017).
 //'
 //' @param rs Column vector containing q x K unique marginal or partial correlations.
 //' @param sigmas 3D array of K estimated q x q covariance matrices for correlations.
@@ -944,19 +944,13 @@ List vcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
   XtSX = XtSX_cpp(sigPsiInvBlks, q, K);
   arma::mat betaCov = arma::inv(XtSX);
 
-  List resList = List::create(
-    _["beta"] = beta,
-    _["betaCov"] = betaCov,
-    _["sigma"] = sigma,
-    _["psi"] = psi
-  );
-
   // Returning full or partial results to help with RAM issues
   if(smallRet) {
     List resList = List::create(
       _["beta"] = beta,
       _["betaCov"] = betaCov
     );
+    return(resList);
   } else {
     List resList = List::create(
       _["beta"] = beta,
@@ -964,9 +958,8 @@ List vcm_cpp(arma::mat rs, arma::cube sigmas, arma::field<arma::mat> sigEigs,
       _["sigma"] = sigma,
       _["psi"] = psi
     );
+    return(resList);
   }
-
-  return(resList);
 }
 
 // [[Rcpp::export]]

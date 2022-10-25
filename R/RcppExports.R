@@ -334,7 +334,7 @@ XtSX_cpp <- function(blocks, q, K) {
 
 #' @title Variance Components Model
 #'
-#' @description This function implements the a variance components model proposed by Fiecas et al. (2017).
+#' @description This function implements the variance components model proposed by Fiecas et al. (2017).
 #'
 #' @param rs Column vector containing q x K unique marginal or partial correlations.
 #' @param sigmas 3D array of K estimated q x q covariance matrices for correlations.

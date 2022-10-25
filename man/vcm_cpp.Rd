@@ -33,7 +33,7 @@ vcm_cpp(
 List of length 4 containing beta (q x 1), betaCov (q x q), sigma (qK x qK), and psi (qK x qK) estimates. If smallRet = true, then only returns beta and betaCov.
 }
 \description{
-This function implements the a variance components model proposed by Fiecas et al. (2017).
+This function implements the variance components model proposed by Fiecas et al. (2017).
 }
 \references{
 Fiecas, M., Cribben, I., Bahktiari, R., and Cummine, J. (2017). A variance components model for statistical inference on functional connectivity networks. NeuroImage (Orlando, Fla.), 149, 256-266.
