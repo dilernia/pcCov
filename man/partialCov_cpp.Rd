@@ -7,7 +7,7 @@
 partialCov_cpp(ts, bw, iMatq, iMate, q)
 }
 \arguments{
-\item{ts}{\eqn{nt} x \eqn{p} matrix of observed p-variate time series.}
+\item{ts}{\eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.}
 
 \item{bw}{nonnegative bandwidth parameter.}
 

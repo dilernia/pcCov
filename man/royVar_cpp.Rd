@@ -9,14 +9,14 @@ royVar_cpp(iMat, tsData, q, bw = 10L)
 \arguments{
 \item{iMat}{Matrix of correlation indices}
 
-\item{tsData}{Matrix of observed n-length p-variate time series}
+\item{tsData}{Matrix of observed \eqn{n}-length \eqn{p}-variate time series}
 
-\item{q}{Integer equal to the number of unique variables pairs given by choose(p, 2)}
+\item{q}{Integer equal to the number of unique variables pairs given by choose(\eqn{p}, 2)}
 
 \item{bw}{Bandwidth parameter}
 }
 \value{
-q x q covariance matrix
+\eqn{q} x \eqn{q} covariance matrix
 }
 \description{
 This function calculates the asymptotic covariance matrix for correlations of a stationary multivariate time series as derived by Roy (1989).

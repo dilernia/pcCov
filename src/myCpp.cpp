@@ -4,6 +4,7 @@
 #include <RcppEigen.h>
 #include <wishart.h>
 #include <mvnorm.h>
+#include <Rmath.h>
 #include <cmath>
 
 // [[Rcpp::depends(RcppArmadillo, RcppEigen)]]
@@ -403,7 +404,7 @@ arma::mat upperTriFill_cpp(int n, arma::vec x) {
 //'
 //' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
 //'
-//' @param ts \eqn{nt} x \eqn{p} matrix of observed p-variate time series.
+//' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 //' @param bw nonnegative bandwidth parameter.
 //' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
 //' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = T).
@@ -562,11 +563,11 @@ double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, NumericVe
 //' @description This function calculates the asymptotic covariance matrix for correlations of a stationary multivariate time series as derived by Roy (1989).
 //'
 //' @param iMat Matrix of correlation indices
-//' @param tsData Matrix of observed n-length p-variate time series
-//' @param q Integer equal to the number of unique variables pairs given by choose(p, 2)
+//' @param tsData Matrix of observed \eqn{n}-length \eqn{p}-variate time series
+//' @param q Integer equal to the number of unique variables pairs given by choose(\eqn{p}, 2)
 //' @param bw Bandwidth parameter
 //'
-//' @return q x q covariance matrix
+//' @return \eqn{q} x \eqn{q} covariance matrix
 //'
 //' @references Roy, R. (1989). Asymptotic covariance structure of serial correlations in multivariate time series. Biometrika, 76(4), 824-827.
 //'
@@ -1066,5 +1067,235 @@ arma::vec dmvnorm_cpp(arma::mat x, arma::vec mu,
   arma::vec ret = dmvnorm(x = x, mu = mu, S = S, log_p = log_p);
 
   return(ret);
+}
+
+// [[Rcpp::export]]
+arma::uvec customMod(IntegerVector v, int n, int nelems) {
+  for(int i = 0; i < nelems; i++) {
+    if(v(i) >= n) {
+      v(i) = v(i) % n;
+    }
+  }
+  return(as<arma::uvec>(v));
+}
+
+// [[Rcpp::export]]
+arma::mat subsetRows(arma::mat x, arma::uvec idx) {
+  arma::mat xsub;
+  xsub = x.rows(idx);
+  return(xsub);
+}
+
+//' @title Moving Block Bootstrap
+//'
+//' @description This function implements the moving block bootstrap as proposed by Kunsch (1989).
+//'
+//' @param mvts \eqn{n} x \eqn{p} matrix of observed \eqn{p}-variate time series
+//' @param winLength nonnegative window length parameter
+//' @param nBoots Number of bootstrap samples
+//' @param stationary Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)
+//'
+//' @return 3D array of dimension \eqn{n} x \eqn{p} x nBoots containing the nBoots bootstrap samples
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @references Kunsch, H. R. (1989). "The Jackknife and the Bootstrap for General Stationary Observations". Annals of Statistics. 17 (3): 1217-1241. doi:10.1214/aos/1176347265.
+//'
+//' Politis, D. N.; Romano, J. P. (1994). "The Stationary Bootstrap". Journal of the American Statistical Association. 89 (428): 1303-1313. doi:10.1080/01621459.1994.10476870. hdl:10983/25607.
+//'
+//' @export
+// [[Rcpp::export]]
+arma::cube blockBoot_cpp(arma::mat mvts, int winLength, int nBoots = 500, bool stationary = false) {
+
+  // Extracting number of variables and observations
+  int p = mvts.n_cols;
+  int N = mvts.n_rows;
+  int nBlocks;
+
+  // Bootstrap indices
+  IntegerVector inds = seq(0, N - winLength);
+
+  // Instantiating vector for block lengths
+  IntegerVector winLengths;
+  double newWin;
+  double Ndub = N - 1.0;
+
+  if(stationary == true) {
+    // Generating variable block lengths
+    while(sum(winLengths) < N) {
+      winLengths.push_back(std::min(Ndub, R::rgeom(1.0/winLength) + 1.0));
+    }
+
+    // Number of blocks
+    nBlocks = winLengths.size();
+  } else {
+    // Number of blocks
+    nBlocks = round(N/(winLength));
+
+    // Window lengths (block-size) for each block
+    winLengths = rep(winLength, nBlocks);
+  }
+
+  // Adjusting so sum of window lengths = N
+  winLengths(nBlocks - 1) = winLengths(nBlocks - 1) - (sum(winLengths) - N);
+
+  // Cumulative sum of window lengths
+  IntegerVector wlCumSum = cumsum(winLengths);
+  wlCumSum.push_front(0);
+
+  //Instantiating vectors for block indices
+  IntegerVector bstarts;
+  IntegerVector bends;
+  arma::uvec binds;
+
+  // Starts of boot indices
+  Rcpp::IntegerVector istarts = Rcpp::sample(inds, nBoots*nBlocks, true);
+
+  // Instantiating array for bootstrap samples
+  arma::cube bootSamps(N, p, nBoots);
+
+  for(int boot = 0; boot < nBoots; boot++) {
+    // Start and end indices for each block
+    bstarts = Rcpp::sample(inds, nBlocks, true);
+    bends = bstarts + winLengths - 1;
+
+    for(int block = 0; block < nBlocks; block++) {
+      // Block indices
+      binds = customMod(seq(bstarts(block), bends(block)), N, winLengths(block));
+      bootSamps.slice(boot)(span(wlCumSum(block), wlCumSum(block+1) - 1), span::all) = subsetRows(mvts, binds);
+    }
+  }
+
+  return(bootSamps);
+}
+
+//' @title Moving Block Bootstrap for Correlation Coefficients
+//'
+//' @description This function implements the moving block bootstrap as proposed by Kunsch (1989) for correlation coefficients.
+//'
+//' @param mvts \eqn{n} x \eqn{p} matrix of observed \eqn{p}-variate time series
+//' @param winLength nonnegative window length parameter
+//' @param nBoots Number of bootstrap samples
+//' @param stationary Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)
+//' @param partial Logical value indicating whether to implement block bootstrap for the partial (TRUE) or marginal (FALSE) correlation coefficients
+//'
+//' @return matrix of dimension \eqn{q} x nBoots containing the \eqn{q=} choose(\eqn{p}, 2) correlations for each of the nBoots bootstrap samples
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @references Kunsch, H. R. (1989). "The Jackknife and the Bootstrap for General Stationary Observations". Annals of Statistics. 17 (3): 1217-1241. doi:10.1214/aos/1176347265.
+//'
+//' Politis, D. N.; Romano, J. P. (1994). "The Stationary Bootstrap". Journal of the American Statistical Association. 89 (428): 1303-1313. doi:10.1080/01621459.1994.10476870. hdl:10983/25607.
+//'
+//' @export
+// [[Rcpp::export]]
+arma::mat blockBootCorr_cpp(arma::mat mvts, int winLength, int nBoots = 500, bool stationary = false, bool partial = true) {
+
+  // Extracting number of variables and observations
+  int p = mvts.n_cols;
+  int N = mvts.n_rows;
+  int nBlocks;
+
+  // Bootstrap indices
+  IntegerVector inds = seq(0, N - winLength);
+
+  // Instantiating vector for block lengths
+  IntegerVector winLengths;
+  double newWin;
+  double Ndub = N - 1.0;
+
+  if(stationary == true) {
+    // Generating variable block lengths
+    while(sum(winLengths) < N) {
+      winLengths.push_back(std::min(Ndub, R::rgeom(1.0/winLength) + 1.0));
+    }
+
+    // Number of blocks
+    nBlocks = winLengths.size();
+  } else {
+    // Number of blocks
+    nBlocks = round(N/(winLength));
+
+    // Window lengths (block-size) for each block
+    winLengths = rep(winLength, nBlocks);
+  }
+
+  // Adjusting so sum of window lengths = N
+  winLengths(nBlocks - 1) = winLengths(nBlocks - 1) - (sum(winLengths) - N);
+
+  // Cumulative sum of window lengths
+  IntegerVector wlCumSum = cumsum(winLengths);
+  wlCumSum.push_front(0);
+
+  //Instantiating vectors for block indices
+  IntegerVector bstarts;
+  IntegerVector bends;
+  arma::uvec binds;
+
+  // Starts of boot indices
+  Rcpp::IntegerVector istarts = Rcpp::sample(inds, nBoots*nBlocks, true);
+
+  // Instantiating array for bootstrap samples
+  arma::cube bootSamps(N, p, nBoots);
+
+  // Instantiating matrix for bootstrap correlations
+  int q = R::choose(p, 2);
+  arma::mat bootCorrs(q, nBoots);
+
+  for(int boot = 0; boot < nBoots; boot++) {
+    // Start and end indices for each block
+    bstarts = Rcpp::sample(inds, nBlocks, true);
+    bends = bstarts + winLengths - 1;
+
+    for(int block = 0; block < nBlocks; block++) {
+      // Block indices
+      binds = customMod(seq(bstarts(block), bends(block)), N, winLengths(block));
+      bootSamps.slice(boot)(span(wlCumSum(block), wlCumSum(block+1) - 1), span::all) = subsetRows(mvts, binds);
+    }
+
+    bootCorrs(span::all, boot) = upperTri_cpp(corrMat_cpp(bootSamps.slice(boot), partial));
+  }
+
+  return(bootCorrs);
+}
+
+//' @title Multi-Subject Moving Block Bootstrap for Correlation Coefficients
+//'
+//' @description This function implements the moving block bootstrap as proposed by Kunsch (1989) for the correlation coefficients of a multi-subject data set.
+//'
+//' @param mvts 3D array of dimension \eqn{n} x \eqn{p} x \eqn{K} of \eqn{n}-length observed \eqn{p}-variate time series for \eqn{K} individuals
+//' @param winLength nonnegative window length parameter
+//' @param nBoots Number of bootstrap samples
+//' @param stationary Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)
+//' @param partial Logical value indicating whether to implement block bootstrap for the partial (TRUE) or marginal (FALSE) correlation coefficients
+//'
+//' @return 3D array of dimension \eqn{q} x nBoots x \eqn{K} containing the \eqn{q=} choose(\eqn{p}, 2) correlations for each of the nBoots bootstrap samples for each of the \eqn{K} individuals
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @references Kunsch, H. R. (1989). "The Jackknife and the Bootstrap for General Stationary Observations". Annals of Statistics. 17 (3): 1217-1241. doi:10.1214/aos/1176347265.
+//'
+//' Politis, D. N.; Romano, J. P. (1994). "The Stationary Bootstrap". Journal of the American Statistical Association. 89 (428): 1303-1313. doi:10.1080/01621459.1994.10476870. hdl:10983/25607.
+//'
+//' @export
+// [[Rcpp::export]]
+arma::cube multiBlockBootCorr_cpp(arma::cube mvts, IntegerVector winLengths, int nBoots = 500, bool stationary = false, bool partial = true) {
+
+  // Extracting number of variables and participants
+  int p = mvts.slice(0).n_cols;
+  int K = mvts.n_slices;
+  int q = R::choose(p, 2);
+
+  // Instantiating array for bootstrap samples
+  arma::cube bootCorrs(q, nBoots, K);
+
+  for(int k = 0; k < K; k++) {
+    bootCorrs.slice(k) = blockBootCorr_cpp(mvts.slice(k), winLengths(k), nBoots, stationary, partial);
+  }
+
+  return(bootCorrs);
 }
 

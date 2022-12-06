@@ -519,6 +519,75 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// customMod
+arma::uvec customMod(IntegerVector v, int n, int nelems);
+RcppExport SEXP _pcCov_customMod(SEXP vSEXP, SEXP nSEXP, SEXP nelemsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type v(vSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< int >::type nelems(nelemsSEXP);
+    rcpp_result_gen = Rcpp::wrap(customMod(v, n, nelems));
+    return rcpp_result_gen;
+END_RCPP
+}
+// subsetRows
+arma::mat subsetRows(arma::mat x, arma::uvec idx);
+RcppExport SEXP _pcCov_subsetRows(SEXP xSEXP, SEXP idxSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::uvec >::type idx(idxSEXP);
+    rcpp_result_gen = Rcpp::wrap(subsetRows(x, idx));
+    return rcpp_result_gen;
+END_RCPP
+}
+// blockBoot_cpp
+arma::cube blockBoot_cpp(arma::mat mvts, int winLength, int nBoots, bool stationary);
+RcppExport SEXP _pcCov_blockBoot_cpp(SEXP mvtsSEXP, SEXP winLengthSEXP, SEXP nBootsSEXP, SEXP stationarySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type mvts(mvtsSEXP);
+    Rcpp::traits::input_parameter< int >::type winLength(winLengthSEXP);
+    Rcpp::traits::input_parameter< int >::type nBoots(nBootsSEXP);
+    Rcpp::traits::input_parameter< bool >::type stationary(stationarySEXP);
+    rcpp_result_gen = Rcpp::wrap(blockBoot_cpp(mvts, winLength, nBoots, stationary));
+    return rcpp_result_gen;
+END_RCPP
+}
+// blockBootCorr_cpp
+arma::mat blockBootCorr_cpp(arma::mat mvts, int winLength, int nBoots, bool stationary, bool partial);
+RcppExport SEXP _pcCov_blockBootCorr_cpp(SEXP mvtsSEXP, SEXP winLengthSEXP, SEXP nBootsSEXP, SEXP stationarySEXP, SEXP partialSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type mvts(mvtsSEXP);
+    Rcpp::traits::input_parameter< int >::type winLength(winLengthSEXP);
+    Rcpp::traits::input_parameter< int >::type nBoots(nBootsSEXP);
+    Rcpp::traits::input_parameter< bool >::type stationary(stationarySEXP);
+    Rcpp::traits::input_parameter< bool >::type partial(partialSEXP);
+    rcpp_result_gen = Rcpp::wrap(blockBootCorr_cpp(mvts, winLength, nBoots, stationary, partial));
+    return rcpp_result_gen;
+END_RCPP
+}
+// multiBlockBootCorr_cpp
+arma::cube multiBlockBootCorr_cpp(arma::cube mvts, IntegerVector winLengths, int nBoots, bool stationary, bool partial);
+RcppExport SEXP _pcCov_multiBlockBootCorr_cpp(SEXP mvtsSEXP, SEXP winLengthsSEXP, SEXP nBootsSEXP, SEXP stationarySEXP, SEXP partialSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::cube >::type mvts(mvtsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type winLengths(winLengthsSEXP);
+    Rcpp::traits::input_parameter< int >::type nBoots(nBootsSEXP);
+    Rcpp::traits::input_parameter< bool >::type stationary(stationarySEXP);
+    Rcpp::traits::input_parameter< bool >::type partial(partialSEXP);
+    rcpp_result_gen = Rcpp::wrap(multiBlockBootCorr_cpp(mvts, winLengths, nBoots, stationary, partial));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_mkSymm_cpp", (DL_FUNC) &_pcCov_mkSymm_cpp, 1},
@@ -560,6 +629,11 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_dwish_cpp", (DL_FUNC) &_pcCov_dwish_cpp, 4},
     {"_pcCov_dwishArray_cpp", (DL_FUNC) &_pcCov_dwishArray_cpp, 4},
     {"_pcCov_dmvnorm_cpp", (DL_FUNC) &_pcCov_dmvnorm_cpp, 4},
+    {"_pcCov_customMod", (DL_FUNC) &_pcCov_customMod, 3},
+    {"_pcCov_subsetRows", (DL_FUNC) &_pcCov_subsetRows, 2},
+    {"_pcCov_blockBoot_cpp", (DL_FUNC) &_pcCov_blockBoot_cpp, 4},
+    {"_pcCov_blockBootCorr_cpp", (DL_FUNC) &_pcCov_blockBootCorr_cpp, 5},
+    {"_pcCov_multiBlockBootCorr_cpp", (DL_FUNC) &_pcCov_multiBlockBootCorr_cpp, 5},
     {NULL, NULL, 0}
 };
 
