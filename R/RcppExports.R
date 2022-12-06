@@ -443,7 +443,7 @@ blockBootCorr_cpp <- function(mvts, winLength, nBoots = 500L, stationary = FALSE
 #' @description This function implements the moving block bootstrap as proposed by Kunsch (1989) for the correlation coefficients of a multi-subject data set.
 #'
 #' @param mvts 3D array of dimension \eqn{n} x \eqn{p} x \eqn{K} of \eqn{n}-length observed \eqn{p}-variate time series for \eqn{K} individuals
-#' @param winLength nonnegative window length parameter
+#' @param winLengths nonnegative integer vector of window / block lengths
 #' @param nBoots Number of bootstrap samples
 #' @param stationary Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)
 #' @param partial Logical value indicating whether to implement block bootstrap for the partial (TRUE) or marginal (FALSE) correlation coefficients

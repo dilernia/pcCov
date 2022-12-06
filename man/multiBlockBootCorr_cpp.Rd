@@ -15,13 +15,13 @@ multiBlockBootCorr_cpp(
 \arguments{
 \item{mvts}{3D array of dimension \eqn{n} x \eqn{p} x \eqn{K} of \eqn{n}-length observed \eqn{p}-variate time series for \eqn{K} individuals}
 
+\item{winLengths}{nonnegative integer vector of window / block lengths}
+
 \item{nBoots}{Number of bootstrap samples}
 
 \item{stationary}{Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)}
 
 \item{partial}{Logical value indicating whether to implement block bootstrap for the partial (TRUE) or marginal (FALSE) correlation coefficients}
-
-\item{winLength}{nonnegative window length parameter}
 }
 \value{
 3D array of dimension \eqn{q} x nBoots x \eqn{K} containing the \eqn{q=} choose(\eqn{p}, 2) correlations for each of the nBoots bootstrap samples for each of the \eqn{K} individuals
