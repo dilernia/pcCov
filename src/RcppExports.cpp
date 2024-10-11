@@ -231,6 +231,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// partialCov_cpp2
+arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q, arma::mat resids);
+RcppExport SEXP _pcCov_partialCov_cpp2(SEXP tsSEXP, SEXP bwSEXP, SEXP iMatqSEXP, SEXP iMateSEXP, SEXP qSEXP, SEXP residsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type ts(tsSEXP);
+    Rcpp::traits::input_parameter< int >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type iMatq(iMatqSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type iMate(iMateSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type resids(residsSEXP);
+    rcpp_result_gen = Rcpp::wrap(partialCov_cpp2(ts, bw, iMatq, iMate, q, resids));
+    return rcpp_result_gen;
+END_RCPP
+}
 // thetaHat_cpp
 double thetaHat_cpp(int i, int j, int l, int m, arma::mat ts, int n, NumericVector hu2s, arma::cube ccMat);
 RcppExport SEXP _pcCov_thetaHat_cpp(SEXP iSEXP, SEXP jSEXP, SEXP lSEXP, SEXP mSEXP, SEXP tsSEXP, SEXP nSEXP, SEXP hu2sSEXP, SEXP ccMatSEXP) {
@@ -608,6 +624,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_taperCovSub_cpp", (DL_FUNC) &_pcCov_taperCovSub_cpp, 4},
     {"_pcCov_upperTriFill_cpp", (DL_FUNC) &_pcCov_upperTriFill_cpp, 2},
     {"_pcCov_partialCov_cpp", (DL_FUNC) &_pcCov_partialCov_cpp, 5},
+    {"_pcCov_partialCov_cpp2", (DL_FUNC) &_pcCov_partialCov_cpp2, 6},
     {"_pcCov_thetaHat_cpp", (DL_FUNC) &_pcCov_thetaHat_cpp, 8},
     {"_pcCov_deltaHat_cpp", (DL_FUNC) &_pcCov_deltaHat_cpp, 9},
     {"_pcCov_royVar_cpp", (DL_FUNC) &_pcCov_royVar_cpp, 4},

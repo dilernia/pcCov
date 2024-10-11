@@ -244,6 +244,26 @@ partialCov_cpp <- function(ts, bw, iMatq, iMate, q) {
     .Call(`_pcCov_partialCov_cpp`, ts, bw, iMatq, iMate, q)
 }
 
+#' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
+#'
+#' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
+#'
+#' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
+#' @param bw nonnegative bandwidth parameter.
+#' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
+#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = T).
+#' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
+#'
+#' @return \eqn{q} x \eqn{q} covariance matrix
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @export
+partialCov_cpp2 <- function(ts, bw, iMatq, iMate, q, resids) {
+    .Call(`_pcCov_partialCov_cpp2`, ts, bw, iMatq, iMate, q, resids)
+}
+
 thetaHat_cpp <- function(i, j, l, m, ts, n, hu2s, ccMat) {
     .Call(`_pcCov_thetaHat_cpp`, i, j, l, m, ts, n, hu2s, ccMat)
 }
