@@ -231,7 +231,7 @@ upperTriFill_cpp <- function(n, x) {
 #' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 #' @param bw nonnegative bandwidth parameter.
 #' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
-#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = T).
+#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE.
 #' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
 #'
 #' @return \eqn{q} x \eqn{q} covariance matrix
@@ -251,8 +251,9 @@ partialCov_cpp <- function(ts, bw, iMatq, iMate, q) {
 #' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 #' @param bw nonnegative bandwidth parameter.
 #' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
-#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = T).
-#' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
+#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE).
+#' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
+#' @param resids \eqn{nt} x \eqn{2q} matrix of regression residuals (optional). Default is to use ordinary least squares to calculate the residuals.
 #'
 #' @return \eqn{q} x \eqn{q} covariance matrix
 #'

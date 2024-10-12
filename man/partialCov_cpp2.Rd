@@ -13,9 +13,11 @@ partialCov_cpp2(ts, bw, iMatq, iMate, q, resids)
 
 \item{iMatq}{matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).}
 
-\item{iMate}{matrix of indices for partial correlations equal to royVarhelper(p, errors = T).}
+\item{iMate}{matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE).}
 
-\item{\eqn{q}}{number of unique partial correlations equal to choose(\eqn{p}, 2).}
+\item{q}{number of unique partial correlations equal to choose(\eqn{p}, 2).}
+
+\item{resids}{\eqn{nt} x \eqn{2q} matrix of regression residuals (optional). Default is to use ordinary least squares to calculate the residuals.}
 }
 \value{
 \eqn{q} x \eqn{q} covariance matrix

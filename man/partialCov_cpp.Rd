@@ -13,7 +13,7 @@ partialCov_cpp(ts, bw, iMatq, iMate, q)
 
 \item{iMatq}{matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).}
 
-\item{iMate}{matrix of indices for partial correlations equal to royVarhelper(p, errors = T).}
+\item{iMate}{matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE.}
 
 \item{\eqn{q}}{number of unique partial correlations equal to choose(\eqn{p}, 2).}
 }

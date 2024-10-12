@@ -200,3 +200,49 @@ partialCov <- function(ts, bw = NULL) {
   }
   return(pcCov::partialCov_cpp(ts = ts, bw = bw, iMatq = iMatq, iMate = indMate, q = q))
 }
+
+#' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
+#'
+#' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a stationary Gaussian process.
+#'
+#' @param ts \eqn{nt} x \eqn{p} matrix of observed p-variate time series.
+#' @param bw Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @examples
+#' # Generate multivariate time series with 5 variables from a
+#' # first-order VAR model with 50 time points
+#' set.seed(1994)
+#' myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
+#'
+#' # Asymptotic covariance matrix for partial correlations
+#' partialCov(ts = myTS)
+#'
+#' @references
+#' Politis, D.N. and H. White (2004), Automatic block-length selection for the dependent bootstrap, \emph{Econometric Reviews}, 23(1), 53-70.
+#'
+#' @export
+partialCov2 <- function(ts, bw = NULL, method = "OLS", lambda = NULL) {
+  p <- ncol(ts)
+  q <- choose(p, 2)
+  indMat <- pcCov::royVarhelper(p)
+  indMate <- pcCov::royVarhelper(p, errors = T)
+  iMatq <- unique(indMat[, 1:2])
+
+  # Selecting optimal bandwidth if unspecified
+  if(is.null(bw)) {
+    bw <- ceiling(mean(np::b.star(ts)[, 1]))
+  }
+
+  if(method == "OLS") {
+    pc_covariance <- pcCov::partialCov_cpp(ts = ts, bw = bw, iMatq = iMatq, iMate = indMate, q = q)
+  } else if(method == "LASSO") {
+    # Calculate residuals using LASSO penalized regression
+    residual_matrix <- calculate_residuals_matrix(ts = ts, iMatq = iMatq, lambda = lambda)
+    pc_covariance <- pcCov::partialCov_cpp2(ts = ts, bw = bw, iMatq = iMatq, iMate = indMate, q = q, resids = residual_matrix)
+  }
+
+  return(pc_covariance)
+}
