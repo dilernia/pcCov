@@ -4,7 +4,7 @@
 \alias{blockBoot_cpp}
 \title{Moving Block Bootstrap}
 \usage{
-blockBoot_cpp(mvts, winLength, nBoots = 500L, stationary = FALSE)
+blockBoot_cpp(mvts, winLength, nBoots = 500L)
 }
 \arguments{
 \item{mvts}{\eqn{n} x \eqn{p} matrix of observed \eqn{p}-variate time series}
@@ -12,8 +12,6 @@ blockBoot_cpp(mvts, winLength, nBoots = 500L, stationary = FALSE)
 \item{winLength}{nonnegative window length parameter}
 
 \item{nBoots}{Number of bootstrap samples}
-
-\item{stationary}{Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)}
 }
 \value{
 3D array of dimension \eqn{n} x \eqn{p} x nBoots containing the nBoots bootstrap samples

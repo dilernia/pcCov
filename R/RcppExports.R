@@ -231,7 +231,7 @@ upperTriFill_cpp <- function(n, x) {
 #' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 #' @param bw nonnegative bandwidth parameter.
 #' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
-#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = T).
+#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE.
 #' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
 #'
 #' @return \eqn{q} x \eqn{q} covariance matrix
@@ -242,6 +242,27 @@ upperTriFill_cpp <- function(n, x) {
 #' @export
 partialCov_cpp <- function(ts, bw, iMatq, iMate, q) {
     .Call(`_pcCov_partialCov_cpp`, ts, bw, iMatq, iMate, q)
+}
+
+#' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
+#'
+#' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
+#'
+#' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
+#' @param bw nonnegative bandwidth parameter.
+#' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
+#' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE).
+#' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
+#' @param resids \eqn{nt} x \eqn{2q} matrix of regression residuals (optional). Default is to use ordinary least squares to calculate the residuals.
+#'
+#' @return \eqn{q} x \eqn{q} covariance matrix
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @export
+partialCov_cpp2 <- function(ts, bw, iMatq, iMate, q, resids) {
+    .Call(`_pcCov_partialCov_cpp2`, ts, bw, iMatq, iMate, q, resids)
 }
 
 thetaHat_cpp <- function(i, j, l, m, ts, n, hu2s, ccMat) {
@@ -398,7 +419,6 @@ subsetRows <- function(x, idx) {
 #' @param mvts \eqn{n} x \eqn{p} matrix of observed \eqn{p}-variate time series
 #' @param winLength nonnegative window length parameter
 #' @param nBoots Number of bootstrap samples
-#' @param stationary Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)
 #'
 #' @return 3D array of dimension \eqn{n} x \eqn{p} x nBoots containing the nBoots bootstrap samples
 #'
@@ -410,8 +430,8 @@ subsetRows <- function(x, idx) {
 #' Politis, D. N.; Romano, J. P. (1994). "The Stationary Bootstrap". Journal of the American Statistical Association. 89 (428): 1303-1313. doi:10.1080/01621459.1994.10476870. hdl:10983/25607.
 #'
 #' @export
-blockBoot_cpp <- function(mvts, winLength, nBoots = 500L, stationary = FALSE) {
-    .Call(`_pcCov_blockBoot_cpp`, mvts, winLength, nBoots, stationary)
+blockBoot_cpp <- function(mvts, winLength, nBoots = 500L) {
+    .Call(`_pcCov_blockBoot_cpp`, mvts, winLength, nBoots)
 }
 
 #' @title Moving Block Bootstrap for Correlation Coefficients
@@ -419,7 +439,7 @@ blockBoot_cpp <- function(mvts, winLength, nBoots = 500L, stationary = FALSE) {
 #' @description This function implements the moving block bootstrap as proposed by Kunsch (1989) for correlation coefficients.
 #'
 #' @param mvts \eqn{n} x \eqn{p} matrix of observed \eqn{p}-variate time series
-#' @param winLength nonnegative window length parameter
+#' @param winLength Nonnegative window length parameter
 #' @param nBoots Number of bootstrap samples
 #' @param stationary Logical value indicating whether to use a variable window length block bootstrap (TRUE) as described by Politis & Romano (1994), or a fixed window length block bootstrap (FALSE) as described by Kunsch (1989)
 #' @param partial Logical value indicating whether to implement block bootstrap for the partial (TRUE) or marginal (FALSE) correlation coefficients

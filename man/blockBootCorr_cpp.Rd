@@ -15,7 +15,7 @@ blockBootCorr_cpp(
 \arguments{
 \item{mvts}{\eqn{n} x \eqn{p} matrix of observed \eqn{p}-variate time series}
 
-\item{winLength}{nonnegative window length parameter}
+\item{winLength}{Nonnegative window length parameter}
 
 \item{nBoots}{Number of bootstrap samples}
 

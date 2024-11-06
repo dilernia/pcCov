@@ -16,7 +16,7 @@ Imports:
     RcppEigen,
     RcppDist,
     np
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 LinkingTo: 
     Rcpp,
     RcppArmadillo,

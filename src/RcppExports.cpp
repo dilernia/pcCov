@@ -231,6 +231,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// partialCov_cpp2
+arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q, arma::mat resids);
+RcppExport SEXP _pcCov_partialCov_cpp2(SEXP tsSEXP, SEXP bwSEXP, SEXP iMatqSEXP, SEXP iMateSEXP, SEXP qSEXP, SEXP residsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type ts(tsSEXP);
+    Rcpp::traits::input_parameter< int >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type iMatq(iMatqSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type iMate(iMateSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type resids(residsSEXP);
+    rcpp_result_gen = Rcpp::wrap(partialCov_cpp2(ts, bw, iMatq, iMate, q, resids));
+    return rcpp_result_gen;
+END_RCPP
+}
 // thetaHat_cpp
 double thetaHat_cpp(int i, int j, int l, int m, arma::mat ts, int n, NumericVector hu2s, arma::cube ccMat);
 RcppExport SEXP _pcCov_thetaHat_cpp(SEXP iSEXP, SEXP jSEXP, SEXP lSEXP, SEXP mSEXP, SEXP tsSEXP, SEXP nSEXP, SEXP hu2sSEXP, SEXP ccMatSEXP) {
@@ -545,16 +561,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // blockBoot_cpp
-arma::cube blockBoot_cpp(arma::mat mvts, int winLength, int nBoots, bool stationary);
-RcppExport SEXP _pcCov_blockBoot_cpp(SEXP mvtsSEXP, SEXP winLengthSEXP, SEXP nBootsSEXP, SEXP stationarySEXP) {
+arma::cube blockBoot_cpp(arma::mat mvts, int winLength, int nBoots);
+RcppExport SEXP _pcCov_blockBoot_cpp(SEXP mvtsSEXP, SEXP winLengthSEXP, SEXP nBootsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type mvts(mvtsSEXP);
     Rcpp::traits::input_parameter< int >::type winLength(winLengthSEXP);
     Rcpp::traits::input_parameter< int >::type nBoots(nBootsSEXP);
-    Rcpp::traits::input_parameter< bool >::type stationary(stationarySEXP);
-    rcpp_result_gen = Rcpp::wrap(blockBoot_cpp(mvts, winLength, nBoots, stationary));
+    rcpp_result_gen = Rcpp::wrap(blockBoot_cpp(mvts, winLength, nBoots));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -608,6 +623,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_taperCovSub_cpp", (DL_FUNC) &_pcCov_taperCovSub_cpp, 4},
     {"_pcCov_upperTriFill_cpp", (DL_FUNC) &_pcCov_upperTriFill_cpp, 2},
     {"_pcCov_partialCov_cpp", (DL_FUNC) &_pcCov_partialCov_cpp, 5},
+    {"_pcCov_partialCov_cpp2", (DL_FUNC) &_pcCov_partialCov_cpp2, 6},
     {"_pcCov_thetaHat_cpp", (DL_FUNC) &_pcCov_thetaHat_cpp, 8},
     {"_pcCov_deltaHat_cpp", (DL_FUNC) &_pcCov_deltaHat_cpp, 9},
     {"_pcCov_royVar_cpp", (DL_FUNC) &_pcCov_royVar_cpp, 4},
@@ -631,7 +647,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_dmvnorm_cpp", (DL_FUNC) &_pcCov_dmvnorm_cpp, 4},
     {"_pcCov_customMod", (DL_FUNC) &_pcCov_customMod, 3},
     {"_pcCov_subsetRows", (DL_FUNC) &_pcCov_subsetRows, 2},
-    {"_pcCov_blockBoot_cpp", (DL_FUNC) &_pcCov_blockBoot_cpp, 4},
+    {"_pcCov_blockBoot_cpp", (DL_FUNC) &_pcCov_blockBoot_cpp, 3},
     {"_pcCov_blockBootCorr_cpp", (DL_FUNC) &_pcCov_blockBootCorr_cpp, 5},
     {"_pcCov_multiBlockBootCorr_cpp", (DL_FUNC) &_pcCov_multiBlockBootCorr_cpp, 5},
     {NULL, NULL, 0}
