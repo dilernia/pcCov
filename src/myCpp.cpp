@@ -338,7 +338,7 @@ arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
 // [[Rcpp::export]]
 arma::mat taperCovSub_cpp(arma::vec ts1, arma::vec ts2, int banw, arma::vec hu2s) {
   int N = ts1.n_elem;
-  IntegerVector non0 = seq(0, banw);
+  arma::uvec non0 = regspace<uvec>(0, banw);
   int uLength = banw + 1;
 
   // Calculating cross-covariance for each lag
@@ -427,7 +427,6 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
   arma::vec pcCovs(ncovs);
 
   int bw2 = pow(bw + 1, 2);
-  IntegerVector bwinds = seq(0, bw2 - 1);
   int n2bw = ceil((N - 2*bw)/2);
 
   // Tapering weights
@@ -568,7 +567,6 @@ arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate
    arma::vec pcCovs(ncovs);
 
    int bw2 = pow(bw + 1, 2);
-   IntegerVector bwinds = seq(0, bw2 - 1);
    int n2bw = ceil((N - 2*bw)/2);
 
    // Tapering weights
@@ -1268,7 +1266,7 @@ arma::cube blockBoot_cpp(arma::mat mvts, int winLength, int nBoots = 500) {
   int nBlocks;
 
   // Bootstrap indices
-  IntegerVector inds = seq(0, N - winLength);
+  IntegerVector inds = Rcpp::seq(0, N - winLength);
 
   // Instantiating vector for block lengths
   IntegerVector winLengths;
@@ -1306,7 +1304,7 @@ arma::cube blockBoot_cpp(arma::mat mvts, int winLength, int nBoots = 500) {
 
     for(int block = 0; block < nBlocks; block++) {
       // Block indices
-      binds = customMod(seq(bstarts(block), bends(block)), N, winLengths(block));
+      binds = customMod(Rcpp::seq(bstarts(block), bends(block)), N, winLengths(block));
       bootSamps.slice(boot)(span(wlCumSum(block), wlCumSum(block+1) - 1), span::all) = subsetRows(mvts, binds);
     }
   }
@@ -1343,7 +1341,7 @@ arma::mat blockBootCorr_cpp(arma::mat mvts, int winLength, int nBoots = 500, boo
   int nBlocks;
 
   // Bootstrap indices
-  IntegerVector inds = seq(0, N - winLength);
+  IntegerVector inds = Rcpp::seq(0, N - winLength);
 
   // Instantiating vector for block lengths
   IntegerVector winLengths;
@@ -1395,7 +1393,7 @@ arma::mat blockBootCorr_cpp(arma::mat mvts, int winLength, int nBoots = 500, boo
 
     for(int block = 0; block < nBlocks; block++) {
       // Block indices
-      binds = customMod(seq(bstarts(block), bends(block)), N, winLengths(block));
+      binds = customMod(Rcpp::seq(bstarts(block), bends(block)), N, winLengths(block));
       bootSamps.slice(boot)(span(wlCumSum(block), wlCumSum(block+1) - 1), span::all) = subsetRows(mvts, binds);
     }
 
