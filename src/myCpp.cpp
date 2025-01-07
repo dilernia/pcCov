@@ -85,9 +85,9 @@ Eigen::MatrixXd arma2eigen(arma::mat arma_A) {
 //' @export
 // [[Rcpp::export]]
 arma::mat eigenMult2(arma::mat A, arma::mat B) {
-  Eigen::MatrixXd C = arma2eigen(A) * arma2eigen(B);
+  arma::mat C = A * B;
 
-  return eigen2arma(C);
+  return C;
 }
 
 //' Multiply three matrices
@@ -102,14 +102,10 @@ arma::mat eigenMult2(arma::mat A, arma::mat B) {
 //' @export
 // [[Rcpp::export]]
 arma::mat eigenMult3(arma::mat A, arma::mat B, arma::mat C){
-  Eigen::MatrixXd Aeig = arma2eigen(A);
-  Eigen::MatrixXd Beig = arma2eigen(B);
-  Eigen::MatrixXd Ceig = arma2eigen(C);
-  Eigen::MatrixXd D = Aeig * Beig * Ceig;
 
-  arma::mat ret = eigen2arma(D);
+  arma::mat D = A * B * C;
 
-  return(ret);
+  return(D);
 }
 
 //' Multiply four matrices
@@ -125,14 +121,10 @@ arma::mat eigenMult3(arma::mat A, arma::mat B, arma::mat C){
 //' @export
 // [[Rcpp::export]]
 arma::mat eigenMult4(arma::mat A, arma::mat B, arma::mat C, arma::mat D){
-  Eigen::MatrixXd Aeig = arma2eigen(A);
-  Eigen::MatrixXd Beig = arma2eigen(B);
-  Eigen::MatrixXd Ceig = arma2eigen(C);
-  Eigen::MatrixXd Deig = arma2eigen(D);
-  Eigen::MatrixXd E = Aeig * Beig * Ceig * Deig;
 
-  arma::mat ret = eigen2arma(E);
-  return(ret);
+  arma::mat E = A * B * C * D;
+
+  return(E);
 }
 
 //' Convert inverse-covariance matrix to partial correlation matrix
@@ -207,10 +199,15 @@ arma::mat corrMat_cpp(arma::mat tsData, bool partial = true) {
 //'
 //' @export
 // [[Rcpp::export]]
-NumericVector cosTaper_cpp(IntegerVector u){
-  IntegerVector uNew = u - min(u);
-  NumericVector sqrtRet = sin(M_PI*as<NumericVector>(uNew) / u.size());
-  return(sqrtRet * sqrtRet);
+arma::vec cosTaper_cpp(arma::vec u) {
+
+  // Calculate the sine values
+  arma::vec sinValues = sin(M_PI * (u - u(0)) / u.n_elem);
+
+  // Perform the sine and square operations
+  arma::vec sqrtRet = square(sinValues);
+
+  return sqrtRet;
 }
 
 //' Function for exponential window taper
@@ -292,8 +289,8 @@ arma::mat crossCov2_cpp(int u, arma::vec ts1, arma::vec ts2) {
 // [[Rcpp::export]]
 arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
   int N = ts1.n_elem;
-  IntegerVector non0 = seq(0, banw);
-  arma::vec hu2s = cosTaper_cpp(seq(-banw, banw))[(seq(banw, 2*banw) - 1)];
+  arma::uvec non0 = regspace<uvec>(0, banw);
+  arma::vec hu2s = cosTaper_cpp(regspace<vec>(-banw, banw)).elem(regspace<uvec>(banw - 1, 2 * banw - 1));
   hu2s(0) = 1;
   int uLength = banw + 1;
 
@@ -306,7 +303,9 @@ arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
 
   // Constructing tapered estimate for residual covariance matrix
   ccs = ccs % hu2s;
+
   arma::mat ccst = ccs.t();
+
   arma::mat sigma(N, N, fill::zeros);
 
   for(int i = 0; i < N - banw; i++) {
@@ -432,8 +431,8 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
   int n2bw = ceil((N - 2*bw)/2);
 
   // Tapering weights
-  NumericVector hu2s = cosTaper_cpp(seq(-bw, bw))[(seq(bw, 2*bw))-1];
-  hu2s[0] = 1;
+  arma::vec hu2s = cosTaper_cpp(regspace<vec>(-bw, bw)).elem(regspace<uvec>(bw - 1, 2*bw - 1));
+  hu2s(0) = 1;
 
   // Calculating residuals and tapered sub-matrices
   arma::mat resids(N, 2*q);
@@ -573,8 +572,8 @@ arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate
    int n2bw = ceil((N - 2*bw)/2);
 
    // Tapering weights
-   NumericVector hu2s = cosTaper_cpp(seq(-bw, bw))[(seq(bw, 2*bw))-1];
-   hu2s[0] = 1;
+   arma::vec hu2s = cosTaper_cpp(regspace<vec>(-bw, bw)).elem(regspace<uvec>(bw - 1, 2*bw - 1));
+   hu2s(0) = 1;
 
    // Calculating residuals and tapered sub-matrices
    arma::cube tapeSubsii(bw2, bw2, 2*q);
@@ -697,18 +696,18 @@ arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate
  }
 
 // [[Rcpp::export]]
-double thetaHat_cpp(int i, int j, int l, int m, arma::mat ts, int n, NumericVector hu2s, arma::cube ccMat) {
-  NumericVector vals1(n);
-  NumericVector vals2(n);
+double thetaHat_cpp(int i, int j, int l, int m, arma::mat ts, int n, arma::vec hu2s, arma::cube ccMat) {
+  arma::vec vals1(n, fill::zeros);
+  arma::vec vals2(n, fill::zeros);
   for(int h = 0; h < n; h++) {
     vals1(h) = ccMat(h, i, j);
     vals2(h) = ccMat(h, l, m);
   }
-  return(sum(hu2s * vals1 * vals2));
+  return(sum(hu2s % vals1 % vals2));
 }
 
 // [[Rcpp::export]]
-double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, NumericVector hu2s,
+double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, arma::vec hu2s,
                     arma::vec ccs, arma::cube ccMat) {
   double crossProd = ccs(i)*ccs(j)*ccs(l)*ccs(m);
   return(thetaHat_cpp(i, j, l, m, mvts, n, hu2s, ccMat) / sqrt(crossProd));
@@ -740,10 +739,10 @@ arma::mat royVar_cpp(arma::mat iMat, arma::mat tsData, int q, int bw = 10) {
   arma::mat pcMat = corrMat_cpp(tsData, false);
 
   // Creating hu2s for thetaHat_cpp
-  IntegerVector mySeq = seq((-n+1), (n-1)) - 1;
-  IntegerVector non0 = mySeq[abs(mySeq) <= bw];
-  NumericVector hu2s = pow(cosTaper_cpp(non0), 2.0);
-  int uLength = non0.size();
+  arma::vec mySeq = regspace<vec>((-n+1), (n-1)) - 1;
+  arma::vec non0 = mySeq(abs(mySeq) <= bw);
+  arma::vec hu2s = pow(cosTaper_cpp(non0), 2.0);
+  int uLength = non0.n_elem;
 
   // Calculating crossCov_cpp for lag 0
   arma::vec ccs(p);
@@ -798,10 +797,10 @@ arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q) {
   arma::mat pcMat = corrMat_cpp(tsData, false);
 
   // Creating hu2s for thetaHat_cpp
-  IntegerVector mySeq = seq((-n+1), (n-1)) - 1;
-  IntegerVector non0 = mySeq[abs(mySeq) <= 10];
-  NumericVector hu2s = pow(cosTaper_cpp(non0), 2.0);
-  int uLength = non0.size();
+  arma::vec mySeq = regspace<vec>((-n+1), (n-1)) - 1;
+  arma::vec non0 = mySeq(abs(mySeq) <= 10);
+  arma::vec hu2s = pow(cosTaper_cpp(non0), 2.0);
+  int uLength = non0.n_elem;
 
   // Calculating crossCov_cpp for lag 0
   arma::vec ccs(p);

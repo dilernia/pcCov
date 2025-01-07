@@ -130,12 +130,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cosTaper_cpp
-NumericVector cosTaper_cpp(IntegerVector u);
+arma::vec cosTaper_cpp(arma::vec u);
 RcppExport SEXP _pcCov_cosTaper_cpp(SEXP uSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type u(uSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type u(uSEXP);
     rcpp_result_gen = Rcpp::wrap(cosTaper_cpp(u));
     return rcpp_result_gen;
 END_RCPP
@@ -248,7 +248,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // thetaHat_cpp
-double thetaHat_cpp(int i, int j, int l, int m, arma::mat ts, int n, NumericVector hu2s, arma::cube ccMat);
+double thetaHat_cpp(int i, int j, int l, int m, arma::mat ts, int n, arma::vec hu2s, arma::cube ccMat);
 RcppExport SEXP _pcCov_thetaHat_cpp(SEXP iSEXP, SEXP jSEXP, SEXP lSEXP, SEXP mSEXP, SEXP tsSEXP, SEXP nSEXP, SEXP hu2sSEXP, SEXP ccMatSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -259,14 +259,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type ts(tsSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type hu2s(hu2sSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type hu2s(hu2sSEXP);
     Rcpp::traits::input_parameter< arma::cube >::type ccMat(ccMatSEXP);
     rcpp_result_gen = Rcpp::wrap(thetaHat_cpp(i, j, l, m, ts, n, hu2s, ccMat));
     return rcpp_result_gen;
 END_RCPP
 }
 // deltaHat_cpp
-double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, NumericVector hu2s, arma::vec ccs, arma::cube ccMat);
+double deltaHat_cpp(int i, int j, int l, int m, arma::mat mvts, int n, arma::vec hu2s, arma::vec ccs, arma::cube ccMat);
 RcppExport SEXP _pcCov_deltaHat_cpp(SEXP iSEXP, SEXP jSEXP, SEXP lSEXP, SEXP mSEXP, SEXP mvtsSEXP, SEXP nSEXP, SEXP hu2sSEXP, SEXP ccsSEXP, SEXP ccMatSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -277,7 +277,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type mvts(mvtsSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type hu2s(hu2sSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type hu2s(hu2sSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type ccs(ccsSEXP);
     Rcpp::traits::input_parameter< arma::cube >::type ccMat(ccMatSEXP);
     rcpp_result_gen = Rcpp::wrap(deltaHat_cpp(i, j, l, m, mvts, n, hu2s, ccs, ccMat));
