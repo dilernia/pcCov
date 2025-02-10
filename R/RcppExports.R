@@ -336,8 +336,8 @@ sigPsiInv_cpp <- function(sigmas, sigVal, qK, q, K) {
 }
 
 #' @export
-arrayEigen_cpp <- function(array3d) {
-    .Call(`_pcCov_arrayEigen_cpp`, array3d)
+eigen_decomposition_array_cpp <- function(array3d) {
+    .Call(`_pcCov_eigen_decomposition_array_cpp`, array3d)
 }
 
 #' @export

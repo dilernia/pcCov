@@ -337,7 +337,6 @@ arma::mat taperCov_cpp(arma::vec ts1, arma::vec ts2, int banw) {
 //' @export
 // [[Rcpp::export]]
 arma::mat taperCovSub_cpp(arma::vec ts1, arma::vec ts2, int banw, arma::vec hu2s) {
-  int N = ts1.n_elem;
   arma::uvec non0 = regspace<uvec>(0, banw);
   int uLength = banw + 1;
 
@@ -954,24 +953,26 @@ arma::mat sigPsiInv_cpp(arma::cube sigmas, double sigVal, int qK, int q, int K) 
 }
 
 //' @export
-// [[Rcpp::export]]
-arma::field<arma::mat> arrayEigen_cpp(arma::cube array3d) {
+ // [[Rcpp::export]]
+ arma::field<arma::mat> eigen_decomposition_array_cpp(arma::cube array3d) {
 
-  // Extracting dimensions
-  int dim3 = array3d.n_slices;
+   // Extracting dimensions
+   int dim3 = array3d.n_slices;
 
-  arma::field<arma::mat> eigList(dim3*2);
-  arma::vec eigval;
-  arma::mat eigvec;
+   arma::field<arma::mat> eigList(dim3 * 2);
+   arma::vec eigval;
+   arma::mat eigvec;
 
-  for (int k = 0; k < dim3; k++) {
-    assert(eig_sym(eigval, eigvec, array3d.slice(k)));
-    eigList(k*2) = eigval;
-    eigList(k*2+1) = eigvec;
-  }
+   for (int k = 0; k < dim3; k++) {
+     if (!eig_sym(eigval, eigvec, array3d.slice(k))) {
+       Rcpp::stop("Eigen decomposition failed for slice %d", k);
+     }
+     eigList(k * 2) = arma::mat(eigval); // Explicitly convert eigenvalues to matrix
+     eigList(k * 2 + 1) = eigvec;
+   }
 
-  return(eigList);
-}
+   return eigList;
+ }
 
 //' @export
 // [[Rcpp::export]]
@@ -1173,7 +1174,7 @@ List royTest_cpp2(arma::field<arma::mat> y1, arma::field<arma::mat> y2, arma::ma
   }
 
   arma::cube sigmas = listRoyVar_cpp(ys, q, iMat);
-  arma::field<arma::mat> eigDecomps = arrayEigen_cpp(sigmas);
+  arma::field<arma::mat> eigDecomps = eigen_decomposition_array_cpp(sigmas);
 
   List resList = List::create(
     _["ginds"] = ginds,
@@ -1270,8 +1271,6 @@ arma::cube blockBoot_cpp(arma::mat mvts, int winLength, int nBoots = 500) {
 
   // Instantiating vector for block lengths
   IntegerVector winLengths;
-  double newWin;
-  double Ndub = N - 1.0;
 
     // Number of blocks
     nBlocks = round(N/(winLength));
@@ -1345,7 +1344,6 @@ arma::mat blockBootCorr_cpp(arma::mat mvts, int winLength, int nBoots = 500, boo
 
   // Instantiating vector for block lengths
   IntegerVector winLengths;
-  double newWin;
   double Ndub = N - 1.0;
 
   if(stationary == true) {

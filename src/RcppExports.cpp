@@ -385,14 +385,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// arrayEigen_cpp
-arma::field<arma::mat> arrayEigen_cpp(arma::cube array3d);
-RcppExport SEXP _pcCov_arrayEigen_cpp(SEXP array3dSEXP) {
+// eigen_decomposition_array_cpp
+arma::field<arma::mat> eigen_decomposition_array_cpp(arma::cube array3d);
+RcppExport SEXP _pcCov_eigen_decomposition_array_cpp(SEXP array3dSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::cube >::type array3d(array3dSEXP);
-    rcpp_result_gen = Rcpp::wrap(arrayEigen_cpp(array3d));
+    rcpp_result_gen = Rcpp::wrap(eigen_decomposition_array_cpp(array3d));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -634,7 +634,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_upperTri_cpp", (DL_FUNC) &_pcCov_upperTri_cpp, 2},
     {"_pcCov_thetaUpdate_cpp", (DL_FUNC) &_pcCov_thetaUpdate_cpp, 3},
     {"_pcCov_sigPsiInv_cpp", (DL_FUNC) &_pcCov_sigPsiInv_cpp, 5},
-    {"_pcCov_arrayEigen_cpp", (DL_FUNC) &_pcCov_arrayEigen_cpp, 1},
+    {"_pcCov_eigen_decomposition_array_cpp", (DL_FUNC) &_pcCov_eigen_decomposition_array_cpp, 1},
     {"_pcCov_eigen_cpp", (DL_FUNC) &_pcCov_eigen_cpp, 1},
     {"_pcCov_sigPsiInvBlks_cpp", (DL_FUNC) &_pcCov_sigPsiInvBlks_cpp, 4},
     {"_pcCov_XtSX_cpp", (DL_FUNC) &_pcCov_XtSX_cpp, 3},
