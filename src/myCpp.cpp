@@ -405,8 +405,8 @@ arma::mat upperTriFill_cpp(int n, arma::vec x) {
 //' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 //' @param bw nonnegative bandwidth parameter.
 //' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
-//' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE.
-//' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
+//' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE).
+//' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
 //'
 //' @return \eqn{q} x \eqn{q} covariance matrix
 //'
@@ -423,7 +423,9 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
   int p = ts.n_cols;
   int ncovs = iMate.n_rows;
   int N = ts.n_rows;
-  arma::vec pcCovs(ncovs);
+
+  // Initialize pcCovs with zeros
+  arma::vec pcCovs(ncovs, arma::fill::zeros);
 
   int bw2 = pow(bw + 1, 2);
   int n2bw = ceil((N - 2*bw)/2);
@@ -536,6 +538,154 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
 
   return(pcCovMat + pcCovMat.t());
 }
+
+//' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
+ //'
+ //' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
+ //'
+ //' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
+ //' @param bw nonnegative bandwidth parameter.
+ //' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
+ //' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE.
+ //' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
+ //'
+ //' @return \eqn{q} x \eqn{q} covariance matrix
+ //'
+ //' @author
+ //' Andrew DiLernia
+ //'
+ //' @export
+ // [[Rcpp::export]]
+ arma::mat partialCov_new_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q) {
+
+   iMatq = iMatq - 1;
+   iMate = iMate - 1;
+
+   int p = ts.n_cols;
+   int ncovs = Rcpp::as<int>(Rcpp::wrap(R::choose(q, 2)));
+   int N = ts.n_rows;
+
+   // Initialize pcCovs with zeros
+   arma::vec pcCovs(ncovs, arma::fill::zeros);
+
+   int bw2 = pow(bw + 1, 2);
+   int n2bw = ceil((N - 2*bw)/2);
+
+   // Tapering weights
+   arma::vec hu2s = cosTaper_cpp(regspace<vec>(-bw, bw)).elem(regspace<uvec>(bw - 1, 2*bw - 1));
+   hu2s(0) = 1;
+
+   // Calculating residuals and tapered sub-matrices
+   arma::mat resids(N, 2*q);
+   arma::cube tapeSubsii(bw2, bw2, 2*q);
+   arma::cube tapeSubsij(bw2, bw2, 2*q);
+   int i;
+   int j;
+   arma::mat projMat(N, N);
+   arma::mat designMat(N, p);
+
+   for(int iter = 1; iter < q + 1; iter++) {
+     designMat = ts;
+     i = iMatq(iter-1, 0);
+     j = iMatq(iter-1, 1);
+     designMat.shed_col(i);
+     designMat.shed_col(j-1);
+     projMat = designMat*arma::solve(designMat.t() * designMat, designMat.t());
+     resids(span::all, iter*2 - 2) = ts.col(i) - projMat*ts.col(i);
+     resids(span::all, iter*2 - 1) = ts.col(j) - projMat*ts.col(j);
+     tapeSubsii.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 2), bw, hu2s);
+     tapeSubsii.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 1), bw, hu2s);
+     tapeSubsij.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 1), bw, hu2s);
+     tapeSubsij.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 2), bw, hu2s);
+   }
+
+   double ssi;
+   double ssj;
+   double ssij;
+   double rdenomij;
+
+   double ssk;
+   double ssm;
+   double sskm;
+   double rdenomkm;
+
+   arma::mat h11ij(bw2, bw2, fill::zeros);
+   arma::mat h22ij(bw2, bw2, fill::zeros);
+   arma::mat h12ij(bw2, bw2, fill::zeros);
+   arma::mat h11km(bw2, bw2, fill::zeros);
+   arma::mat h22km(bw2, bw2, fill::zeros);
+   arma::mat h12km(bw2, bw2, fill::zeros);
+
+   arma::mat sigEpsik(bw2, bw2, fill::zeros);
+   arma::mat sigEpsim(bw2, bw2, fill::zeros);
+   arma::mat sigEpsjk(bw2, bw2, fill::zeros);
+   arma::mat sigEpsjm(bw2, bw2, fill::zeros);
+
+   arma::mat cpse1(bw2, bw2, fill::zeros);
+   arma::mat cpse2(bw2, bw2, fill::zeros);
+   arma::mat cpse3(bw2, bw2, fill::zeros);
+   arma::mat cpse4(bw2, bw2, fill::zeros);
+
+   double Vijkm;
+
+   for(int iter = 0; iter < ncovs; iter++) {
+
+     // Make covariance between disjoint pairs be 0 (i != k,m and j != k,m)
+     if (iMate(iter, 1) != iMate(iter, 3) && iMate(iter, 1) != iMate(iter, 4) &&
+         iMate(iter, 2) != iMate(iter, 3) && iMate(iter, 2) != iMate(iter, 4)) {
+       continue; // Skip to the next iteration and leave as 0
+     }
+
+     ssi = tapeSubsii.slice(iMate(iter, 0))(0, 0)*(N-1);
+     ssj = tapeSubsii.slice(iMate(iter, 1))(0, 0)*(N-1);
+     ssij = tapeSubsij.slice(iMate(iter, 0))(0, 0)*(N-1);
+     rdenomij = 1 / sqrt(ssi * ssj);
+
+     ssk = tapeSubsii.slice(iMate(iter, 2))(0, 0)*(N-1);
+     ssm = tapeSubsii.slice(iMate(iter, 3))(0, 0)*(N-1);
+     sskm = tapeSubsij.slice(iMate(iter, 2))(0, 0)*(N-1);
+     rdenomkm = 1 / sqrt(ssk * ssm);
+
+     // Hessian matrices
+     h11ij = -2*tapeSubsij.slice(iMate(iter, 0))*pow(rdenomij, 3) * ssj + 3*tapeSubsii.slice(iMate(iter, 0))*pow(rdenomij, 5)*pow(ssj, 2)*ssij - ssij*pow(rdenomij, 3)*ssj*eye(bw2, bw2);
+     h22ij = -2*tapeSubsij.slice(iMate(iter, 1))*pow(rdenomij, 3) * ssi + 3*tapeSubsii.slice(iMate(iter, 1))*pow(rdenomij, 5)*pow(ssi, 2)*ssij - ssij*pow(rdenomij, 3)*ssi*eye(bw2, bw2);
+
+     h12ij = -tapeSubsii.slice(iMate(iter, 0))*pow(rdenomij, 3)*ssj + tapeSubsij.slice(iMate(iter, 0))*pow(rdenomij, 3)*ssij - tapeSubsii.slice(iMate(iter, 1))*pow(rdenomij, 3)*ssi + rdenomij*eye(bw2, bw2);
+
+     h11km = -2*tapeSubsij.slice(iMate(iter, 2))*pow(rdenomkm, 3) * ssm + 3*tapeSubsii.slice(iMate(iter, 2))*pow(rdenomkm, 5)*pow(ssm, 2)*sskm - sskm*pow(rdenomkm, 3)*ssm *eye(bw2, bw2);
+
+     h22km = -2*tapeSubsij.slice(iMate(iter, 3))*pow(rdenomkm, 3) * ssk + 3*tapeSubsii.slice(iMate(iter, 3))*pow(rdenomkm, 5)*pow(ssk, 2)*sskm - sskm*pow(rdenomkm, 3)*ssk *eye(bw2, bw2);
+
+     h12km = -tapeSubsii.slice(iMate(iter, 2))*pow(rdenomkm, 3)*ssm + tapeSubsij.slice(iMate(iter, 2))*pow(rdenomkm, 3)*sskm - tapeSubsii.slice(iMate(iter, 3))*pow(rdenomkm, 3)*ssk + rdenomkm*eye(bw2, bw2);
+
+     sigEpsik = taperCovSub_cpp(resids(span::all,iMate(iter, 0)), resids(span::all,iMate(iter, 2)), bw, hu2s);
+     sigEpsim = taperCovSub_cpp(resids(span::all,iMate(iter, 0)), resids(span::all,iMate(iter, 3)), bw, hu2s);
+     sigEpsjk = taperCovSub_cpp(resids(span::all,iMate(iter, 1)), resids(span::all,iMate(iter, 2)), bw, hu2s);
+     sigEpsjm = taperCovSub_cpp(resids(span::all,iMate(iter, 1)), resids(span::all,iMate(iter, 3)), bw, hu2s);
+
+     cpse1 = eigenMult2((eigenMult2(h11ij, sigEpsik) + eigenMult2(h12ij, sigEpsjk)),
+                        (eigenMult2(h11km, sigEpsik) + eigenMult2(h12km, sigEpsim)));
+     cpse2 = eigenMult2((eigenMult2(h11ij, sigEpsim) + eigenMult2(h12ij, sigEpsjm)),
+                        (eigenMult2(h12km, sigEpsik) + eigenMult2(h22km, sigEpsim)));
+     cpse3 = eigenMult2((eigenMult2(h12ij, sigEpsik) + eigenMult2(h22ij, sigEpsjk)),
+                        (eigenMult2(h11km, sigEpsjk) + eigenMult2(h12km, sigEpsjm)));
+     cpse4 = eigenMult2((eigenMult2(h12ij, sigEpsim) + eigenMult2(h22ij, sigEpsjm)),
+                        (eigenMult2(h12km, sigEpsjk) + eigenMult2(h22km, sigEpsjm)));
+
+     Vijkm = n2bw*cpse1(bw, bw) + accu(cpse1(span(0, bw-1), span(0, bw-1)).diag()) +
+       n2bw*cpse2(bw, bw) + accu(cpse2(span(0, bw-1), span(0, bw-1)).diag()) +
+       n2bw*cpse3(bw, bw) + accu(cpse3(span(0, bw-1), span(0, bw-1)).diag()) +
+       n2bw*cpse4(bw, bw) + accu(cpse4(span(0, bw-1), span(0, bw-1)).diag());
+
+     pcCovs(iter) = Vijkm;
+   }
+
+   // Instantiating covariance matrix
+   arma::mat pcCovMat = upperTriFill_cpp(q, pcCovs);
+   pcCovMat.diag() = pcCovMat.diag() / 2;
+
+   return(pcCovMat + pcCovMat.t());
+ }
 
 //' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
 //'
@@ -786,18 +936,25 @@ arma::mat royVar_cpp(arma::mat iMat, arma::mat tsData, int q, int bw = 10) {
 
 //' @export
 // [[Rcpp::export]]
-arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q) {
+arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q, int bw = 10) {
   int N = iMat.n_rows;
   int n = tsData.n_rows;
   int p = tsData.n_cols;
 
+  std::cout << "iMat Rows: " << N << ", tsData Rows: " << n << ", tsData Cols: " << p << std::endl;
+
   arma::mat pcMat = corrMat_cpp(tsData, false);
+  std::cout << "pcMat calculated." << std::endl;
 
   // Creating hu2s for thetaHat_cpp
   arma::vec mySeq = regspace<vec>((-n+1), (n-1)) - 1;
-  arma::vec non0 = mySeq(abs(mySeq) <= 10);
+  arma::vec non0 = mySeq(abs(mySeq) <= bw);
   arma::vec hu2s = pow(cosTaper_cpp(non0), 2.0);
   int uLength = non0.n_elem;
+
+  std::cout << "mySeq: " << mySeq.t() << std::endl;
+  std::cout << "non0: " << non0.t() << std::endl;
+  std::cout << "uLength: " << uLength << std::endl;
 
   // Calculating crossCov_cpp for lag 0
   arma::vec ccs(p);
@@ -805,41 +962,55 @@ arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q) {
     ccs(i) = crossCov_cpp(0, tsData.col(i), tsData.col(i));
   }
 
+  std::cout << "ccs: " << ccs.t() << std::endl;
+
   // Calculating crossCov_cpp for different lags
   arma::cube ccMat(uLength, p, p);
+  for(int h = 0; h < uLength; h++) {
+    for(int i = 0; i < p; i++) {
+      for(int j = 0; j < p; j++) {
+        ccMat(h, i, j) = crossCov_cpp(non0[h], tsData.col(i), tsData.col(j));
+      }
+    }
+  }
+
+  std::cout << "ccMat calculated." << std::endl;
 
   arma::vec royCov(N);
   for(int k = 0; k < N; k++) {
     int a = iMat(k, 0) - 1;
-    int b = a + 1;
+    int b = iMat(k, 1) - 1;
     int d = iMat(k, 2) - 1;
-    int e = d + 1;
+    int e = iMat(k, 3) - 1;
 
-    for(int h = 0; h < uLength; h++) {
-      ccMat(h, a, d) = crossCov_cpp(non0[h], tsData.col(a), tsData.col(d));
-      ccMat(h, a, e) = crossCov_cpp(non0[h], tsData.col(a), tsData.col(e));
-      ccMat(h, b, d) = crossCov_cpp(non0[h], tsData.col(b), tsData.col(d));
-      ccMat(h, b, e) = crossCov_cpp(non0[h], tsData.col(b), tsData.col(e));
-    }
+    std::cout << "Indices a: " << a << ", b: " << b << ", d: " << d << ", e: " << e << std::endl;
 
-    royCov[k] = (0.50*pcMat(a, b)*pcMat(d, e)*(deltaHat_cpp(a, d, a, d, tsData,
-                                        uLength, hu2s, ccs, ccMat) +
-                                          deltaHat_cpp(a, e, a, e, tsData, uLength, hu2s, ccs, ccMat) +
-                                          deltaHat_cpp(b, d, b, d, tsData, uLength, hu2s, ccs, ccMat) +
-                                          deltaHat_cpp(b, e, b, e, tsData, uLength, hu2s, ccs, ccMat))
-                   - pcMat(a, b)*(deltaHat_cpp(a, d, a, e, tsData, uLength, hu2s, ccs, ccMat) +
+    royCov[k] = (0.50 * pcMat(a, b) * pcMat(d, e) * (deltaHat_cpp(a, d, a, d, tsData,
+                                            uLength, hu2s, ccs, ccMat) +
+                                              deltaHat_cpp(a, e, a, e, tsData, uLength, hu2s, ccs, ccMat) +
+                                              deltaHat_cpp(b, d, b, d, tsData, uLength, hu2s, ccs, ccMat) +
+                                              deltaHat_cpp(b, e, b, e, tsData, uLength, hu2s, ccs, ccMat))
+                   - pcMat(a, b) * (deltaHat_cpp(a, d, a, e, tsData, uLength, hu2s, ccs, ccMat) +
                      deltaHat_cpp(b, d, b, e, tsData, uLength, hu2s, ccs, ccMat))
-                   - pcMat(d, e)*(deltaHat_cpp(b, d, a, d, tsData, uLength, hu2s, ccs, ccMat) +
+                   - pcMat(d, e) * (deltaHat_cpp(b, d, a, d, tsData, uLength, hu2s, ccs, ccMat) +
                      deltaHat_cpp(b, e, a, e, tsData, uLength, hu2s, ccs, ccMat)) +
                      deltaHat_cpp(a, d, b, e, tsData, uLength, hu2s, ccs, ccMat) +
                      deltaHat_cpp(b, d, a, e, tsData, uLength, hu2s, ccs, ccMat));
+
+    if (k % 10 == 0) {  // Print every 10 iterations
+      std::cout << "royCov[" << k << "]: " << royCov[k] << std::endl;
+    }
   }
 
   arma::mat upperMat = upperTriFill_cpp(q, royCov / n);
+  std::cout << "upperMat calculated." << std::endl;
+
   arma::vec diagVals = upperMat.diag();
   arma::mat lowerMat = upperMat.t();
   arma::mat ret = upperMat + lowerMat;
   ret.diag()  = diagVals;
+
+  std::cout << "Final result calculated." << std::endl;
   return(ret);
 }
 

@@ -231,6 +231,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// partialCov_new_cpp
+arma::mat partialCov_new_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q);
+RcppExport SEXP _pcCov_partialCov_new_cpp(SEXP tsSEXP, SEXP bwSEXP, SEXP iMatqSEXP, SEXP iMateSEXP, SEXP qSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type ts(tsSEXP);
+    Rcpp::traits::input_parameter< int >::type bw(bwSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type iMatq(iMatqSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type iMate(iMateSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    rcpp_result_gen = Rcpp::wrap(partialCov_new_cpp(ts, bw, iMatq, iMate, q));
+    return rcpp_result_gen;
+END_RCPP
+}
 // partialCov_cpp2
 arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q, arma::mat resids);
 RcppExport SEXP _pcCov_partialCov_cpp2(SEXP tsSEXP, SEXP bwSEXP, SEXP iMatqSEXP, SEXP iMateSEXP, SEXP qSEXP, SEXP residsSEXP) {
@@ -299,15 +314,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // royVar2_cpp
-arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q);
-RcppExport SEXP _pcCov_royVar2_cpp(SEXP iMatSEXP, SEXP tsDataSEXP, SEXP qSEXP) {
+arma::mat royVar2_cpp(arma::mat iMat, arma::mat tsData, int q, int bw);
+RcppExport SEXP _pcCov_royVar2_cpp(SEXP iMatSEXP, SEXP tsDataSEXP, SEXP qSEXP, SEXP bwSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type iMat(iMatSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type tsData(tsDataSEXP);
     Rcpp::traits::input_parameter< int >::type q(qSEXP);
-    rcpp_result_gen = Rcpp::wrap(royVar2_cpp(iMat, tsData, q));
+    Rcpp::traits::input_parameter< int >::type bw(bwSEXP);
+    rcpp_result_gen = Rcpp::wrap(royVar2_cpp(iMat, tsData, q, bw));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -623,11 +639,12 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_taperCovSub_cpp", (DL_FUNC) &_pcCov_taperCovSub_cpp, 4},
     {"_pcCov_upperTriFill_cpp", (DL_FUNC) &_pcCov_upperTriFill_cpp, 2},
     {"_pcCov_partialCov_cpp", (DL_FUNC) &_pcCov_partialCov_cpp, 5},
+    {"_pcCov_partialCov_new_cpp", (DL_FUNC) &_pcCov_partialCov_new_cpp, 5},
     {"_pcCov_partialCov_cpp2", (DL_FUNC) &_pcCov_partialCov_cpp2, 6},
     {"_pcCov_thetaHat_cpp", (DL_FUNC) &_pcCov_thetaHat_cpp, 8},
     {"_pcCov_deltaHat_cpp", (DL_FUNC) &_pcCov_deltaHat_cpp, 9},
     {"_pcCov_royVar_cpp", (DL_FUNC) &_pcCov_royVar_cpp, 4},
-    {"_pcCov_royVar2_cpp", (DL_FUNC) &_pcCov_royVar2_cpp, 3},
+    {"_pcCov_royVar2_cpp", (DL_FUNC) &_pcCov_royVar2_cpp, 4},
     {"_pcCov_bdiagArray_cpp", (DL_FUNC) &_pcCov_bdiagArray_cpp, 1},
     {"_pcCov_xMaker_cpp", (DL_FUNC) &_pcCov_xMaker_cpp, 2},
     {"_pcCov_arrayMean_cpp", (DL_FUNC) &_pcCov_arrayMean_cpp, 1},
