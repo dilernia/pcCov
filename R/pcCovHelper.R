@@ -203,10 +203,17 @@ partialCov <- function(ts, bw = NULL) {
 
 #' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
 #'
-#' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a stationary Gaussian process.
+#' @description This function calculates the second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series proposed by DiLernia, Fiecas, and Zhang (2024).
 #'
-#' @param ts \eqn{nt} x \eqn{p} matrix of observed p-variate time series.
-#' @param bw Specified bandwidth (Optional). If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).
+#' @param mvts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
+#' @param bandwidth Optional nonnegative bandwidth parameter. If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).
+#' @param diagonal_only Optional logical value, indicating if covariances between correlations are calculated (FALSE) or are returned as 0 (TRUE).
+#' @param residuals Optional \eqn{nt} x \eqn{2q} matrix of empirical residuals (optional). If not specified, residuals are obtained using ordinary least squares.
+#' @param correlation_indices Optional matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
+#' @param residual_pairs Optional (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for residual pairs equal to royVarhelper(p, errors = TRUE).
+#' @param correlation_pairs Optional (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for partial correlation pairs equal to royVarhelper(p, errors = FALSE).
+#'
+#' @return \eqn{q} x \eqn{q} covariance matrix
 #'
 #' @author
 #' Andrew DiLernia
@@ -218,31 +225,43 @@ partialCov <- function(ts, bw = NULL) {
 #' myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
 #'
 #' # Asymptotic covariance matrix for partial correlations
-#' partialCov(ts = myTS)
+#' partial_corr_asymptotic_cov(mvts = myTS)
 #'
 #' @references
-#' Politis, D.N. and H. White (2004), Automatic block-length selection for the dependent bootstrap, \emph{Econometric Reviews}, 23(1), 53-70.
+#' A S DiLernia, M Fiecas, L Zhang.
+#' Inference for partial correlations of a multivariate Gaussian time series.
+#' \emph{Biometrika}, Volume 111, Issue 4, December 2024, Pages 1437–1444.
+#' https://doi.org/10.1093/biomet/asae012
+#'
+#' Politis, D.N., and H. White.
+#' Automatic block-length selection for the dependent bootstrap.
+#' \emph{Econometric Reviews}, 23(1), 53-70.
 #'
 #' @export
-partialCov2 <- function(ts, bw = NULL, method = "OLS", lambda = NULL) {
-  p <- ncol(ts)
+partial_corr_asymptotic_cov <- function(mvts, bandwidth = NULL, diagonal_only = FALSE, residuals = NULL, residual_pairs = NULL, correlation_pairs = NULL, correlation_indices = NULL) {
+  p <- ncol(mvts)
   q <- choose(p, 2)
-  indMat <- pcCov::royVarhelper(p)
-  indMate <- pcCov::royVarhelper(p, errors = T)
-  iMatq <- unique(indMat[, 1:2])
+
+  if(is.null(residual_pairs)) {
+    residual_pairs <- pcCov::royVarhelper(p, errors = T)
+  }
+
+  if(is.null(correlation_pairs)) {
+    correlation_pairs <- royVarhelper(p, errors = FALSE)
+  }
+
+  correlation_indices <- unique(correlation_pairs[, 1:2])
 
   # Selecting optimal bandwidth if unspecified
-  if(is.null(bw)) {
-    bw <- ceiling(mean(np::b.star(ts)[, 1]))
+  if(is.null(bandwidth)) {
+    bandwidth <- ceiling(mean(np::b.star(mvts)[, 1]))
   }
-
-  if(method == "OLS") {
-    pc_covariance <- pcCov::partialCov_cpp(ts = ts, bw = bw, iMatq = iMatq, iMate = indMate, q = q)
-  } else if(method == "LASSO") {
-    # Calculate residuals using LASSO penalized regression
-    residual_matrix <- calculate_residuals_matrix(ts = ts, iMatq = iMatq, lambda = lambda)
-    pc_covariance <- pcCov::partialCov_cpp2(ts = ts, bw = bw, iMatq = iMatq, iMate = indMate, q = q, resids = residual_matrix)
-  }
-
-  return(pc_covariance)
+  return(pcCov::partial_corr_asymptotic_cov_cpp(mvts = mvts,
+                                                bandwidth = bandwidth,
+                                                q = q,
+                                                correlation_indices = correlation_indices,
+                                                residual_pairs = residual_pairs,
+                                                correlation_pairs = correlation_pairs,
+                                                residuals = residuals,
+                                                diagonal_only = diagonal_only))
 }

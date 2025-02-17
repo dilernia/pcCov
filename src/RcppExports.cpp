@@ -231,34 +231,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// partialCov_new_cpp
-arma::mat partialCov_new_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q);
-RcppExport SEXP _pcCov_partialCov_new_cpp(SEXP tsSEXP, SEXP bwSEXP, SEXP iMatqSEXP, SEXP iMateSEXP, SEXP qSEXP) {
+// partial_corr_asymptotic_cov_cpp
+arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals, bool diagonal_only);
+RcppExport SEXP _pcCov_partial_corr_asymptotic_cov_cpp(SEXP mvtsSEXP, SEXP bandwidthSEXP, SEXP qSEXP, SEXP correlation_indicesSEXP, SEXP residual_pairsSEXP, SEXP correlation_pairsSEXP, SEXP residualsSEXP, SEXP diagonal_onlySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type ts(tsSEXP);
-    Rcpp::traits::input_parameter< int >::type bw(bwSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type iMatq(iMatqSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type iMate(iMateSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type mvts(mvtsSEXP);
+    Rcpp::traits::input_parameter< int >::type bandwidth(bandwidthSEXP);
     Rcpp::traits::input_parameter< int >::type q(qSEXP);
-    rcpp_result_gen = Rcpp::wrap(partialCov_new_cpp(ts, bw, iMatq, iMate, q));
-    return rcpp_result_gen;
-END_RCPP
-}
-// partialCov_cpp2
-arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q, arma::mat resids);
-RcppExport SEXP _pcCov_partialCov_cpp2(SEXP tsSEXP, SEXP bwSEXP, SEXP iMatqSEXP, SEXP iMateSEXP, SEXP qSEXP, SEXP residsSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::mat >::type ts(tsSEXP);
-    Rcpp::traits::input_parameter< int >::type bw(bwSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type iMatq(iMatqSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type iMate(iMateSEXP);
-    Rcpp::traits::input_parameter< int >::type q(qSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type resids(residsSEXP);
-    rcpp_result_gen = Rcpp::wrap(partialCov_cpp2(ts, bw, iMatq, iMate, q, resids));
+    Rcpp::traits::input_parameter< arma::mat >::type correlation_indices(correlation_indicesSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type residual_pairs(residual_pairsSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type correlation_pairs(correlation_pairsSEXP);
+    Rcpp::traits::input_parameter< Nullable<NumericMatrix> >::type residuals(residualsSEXP);
+    Rcpp::traits::input_parameter< bool >::type diagonal_only(diagonal_onlySEXP);
+    rcpp_result_gen = Rcpp::wrap(partial_corr_asymptotic_cov_cpp(mvts, bandwidth, q, correlation_indices, residual_pairs, correlation_pairs, residuals, diagonal_only));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -639,8 +626,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_taperCovSub_cpp", (DL_FUNC) &_pcCov_taperCovSub_cpp, 4},
     {"_pcCov_upperTriFill_cpp", (DL_FUNC) &_pcCov_upperTriFill_cpp, 2},
     {"_pcCov_partialCov_cpp", (DL_FUNC) &_pcCov_partialCov_cpp, 5},
-    {"_pcCov_partialCov_new_cpp", (DL_FUNC) &_pcCov_partialCov_new_cpp, 5},
-    {"_pcCov_partialCov_cpp2", (DL_FUNC) &_pcCov_partialCov_cpp2, 6},
+    {"_pcCov_partial_corr_asymptotic_cov_cpp", (DL_FUNC) &_pcCov_partial_corr_asymptotic_cov_cpp, 8},
     {"_pcCov_thetaHat_cpp", (DL_FUNC) &_pcCov_thetaHat_cpp, 8},
     {"_pcCov_deltaHat_cpp", (DL_FUNC) &_pcCov_deltaHat_cpp, 9},
     {"_pcCov_royVar_cpp", (DL_FUNC) &_pcCov_royVar_cpp, 4},

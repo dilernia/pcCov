@@ -540,163 +540,17 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
 }
 
 //' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
- //'
- //' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
- //'
- //' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
- //' @param bw nonnegative bandwidth parameter.
- //' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
- //' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE.
- //' @param \eqn{q} number of unique partial correlations equal to choose(\eqn{p}, 2).
- //'
- //' @return \eqn{q} x \eqn{q} covariance matrix
- //'
- //' @author
- //' Andrew DiLernia
- //'
- //' @export
- // [[Rcpp::export]]
- arma::mat partialCov_new_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q) {
-
-   iMatq = iMatq - 1;
-   iMate = iMate - 1;
-
-   int p = ts.n_cols;
-   int ncovs = Rcpp::as<int>(Rcpp::wrap(R::choose(q, 2)));
-   int N = ts.n_rows;
-
-   // Initialize pcCovs with zeros
-   arma::vec pcCovs(ncovs, arma::fill::zeros);
-
-   int bw2 = pow(bw + 1, 2);
-   int n2bw = ceil((N - 2*bw)/2);
-
-   // Tapering weights
-   arma::vec hu2s = cosTaper_cpp(regspace<vec>(-bw, bw)).elem(regspace<uvec>(bw - 1, 2*bw - 1));
-   hu2s(0) = 1;
-
-   // Calculating residuals and tapered sub-matrices
-   arma::mat resids(N, 2*q);
-   arma::cube tapeSubsii(bw2, bw2, 2*q);
-   arma::cube tapeSubsij(bw2, bw2, 2*q);
-   int i;
-   int j;
-   arma::mat projMat(N, N);
-   arma::mat designMat(N, p);
-
-   for(int iter = 1; iter < q + 1; iter++) {
-     designMat = ts;
-     i = iMatq(iter-1, 0);
-     j = iMatq(iter-1, 1);
-     designMat.shed_col(i);
-     designMat.shed_col(j-1);
-     projMat = designMat*arma::solve(designMat.t() * designMat, designMat.t());
-     resids(span::all, iter*2 - 2) = ts.col(i) - projMat*ts.col(i);
-     resids(span::all, iter*2 - 1) = ts.col(j) - projMat*ts.col(j);
-     tapeSubsii.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 2), bw, hu2s);
-     tapeSubsii.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 1), bw, hu2s);
-     tapeSubsij.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 1), bw, hu2s);
-     tapeSubsij.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 2), bw, hu2s);
-   }
-
-   double ssi;
-   double ssj;
-   double ssij;
-   double rdenomij;
-
-   double ssk;
-   double ssm;
-   double sskm;
-   double rdenomkm;
-
-   arma::mat h11ij(bw2, bw2, fill::zeros);
-   arma::mat h22ij(bw2, bw2, fill::zeros);
-   arma::mat h12ij(bw2, bw2, fill::zeros);
-   arma::mat h11km(bw2, bw2, fill::zeros);
-   arma::mat h22km(bw2, bw2, fill::zeros);
-   arma::mat h12km(bw2, bw2, fill::zeros);
-
-   arma::mat sigEpsik(bw2, bw2, fill::zeros);
-   arma::mat sigEpsim(bw2, bw2, fill::zeros);
-   arma::mat sigEpsjk(bw2, bw2, fill::zeros);
-   arma::mat sigEpsjm(bw2, bw2, fill::zeros);
-
-   arma::mat cpse1(bw2, bw2, fill::zeros);
-   arma::mat cpse2(bw2, bw2, fill::zeros);
-   arma::mat cpse3(bw2, bw2, fill::zeros);
-   arma::mat cpse4(bw2, bw2, fill::zeros);
-
-   double Vijkm;
-
-   for(int iter = 0; iter < ncovs; iter++) {
-
-     // Make covariance between disjoint pairs be 0 (i != k,m and j != k,m)
-     if (iMate(iter, 1) != iMate(iter, 3) && iMate(iter, 1) != iMate(iter, 4) &&
-         iMate(iter, 2) != iMate(iter, 3) && iMate(iter, 2) != iMate(iter, 4)) {
-       continue; // Skip to the next iteration and leave as 0
-     }
-
-     ssi = tapeSubsii.slice(iMate(iter, 0))(0, 0)*(N-1);
-     ssj = tapeSubsii.slice(iMate(iter, 1))(0, 0)*(N-1);
-     ssij = tapeSubsij.slice(iMate(iter, 0))(0, 0)*(N-1);
-     rdenomij = 1 / sqrt(ssi * ssj);
-
-     ssk = tapeSubsii.slice(iMate(iter, 2))(0, 0)*(N-1);
-     ssm = tapeSubsii.slice(iMate(iter, 3))(0, 0)*(N-1);
-     sskm = tapeSubsij.slice(iMate(iter, 2))(0, 0)*(N-1);
-     rdenomkm = 1 / sqrt(ssk * ssm);
-
-     // Hessian matrices
-     h11ij = -2*tapeSubsij.slice(iMate(iter, 0))*pow(rdenomij, 3) * ssj + 3*tapeSubsii.slice(iMate(iter, 0))*pow(rdenomij, 5)*pow(ssj, 2)*ssij - ssij*pow(rdenomij, 3)*ssj*eye(bw2, bw2);
-     h22ij = -2*tapeSubsij.slice(iMate(iter, 1))*pow(rdenomij, 3) * ssi + 3*tapeSubsii.slice(iMate(iter, 1))*pow(rdenomij, 5)*pow(ssi, 2)*ssij - ssij*pow(rdenomij, 3)*ssi*eye(bw2, bw2);
-
-     h12ij = -tapeSubsii.slice(iMate(iter, 0))*pow(rdenomij, 3)*ssj + tapeSubsij.slice(iMate(iter, 0))*pow(rdenomij, 3)*ssij - tapeSubsii.slice(iMate(iter, 1))*pow(rdenomij, 3)*ssi + rdenomij*eye(bw2, bw2);
-
-     h11km = -2*tapeSubsij.slice(iMate(iter, 2))*pow(rdenomkm, 3) * ssm + 3*tapeSubsii.slice(iMate(iter, 2))*pow(rdenomkm, 5)*pow(ssm, 2)*sskm - sskm*pow(rdenomkm, 3)*ssm *eye(bw2, bw2);
-
-     h22km = -2*tapeSubsij.slice(iMate(iter, 3))*pow(rdenomkm, 3) * ssk + 3*tapeSubsii.slice(iMate(iter, 3))*pow(rdenomkm, 5)*pow(ssk, 2)*sskm - sskm*pow(rdenomkm, 3)*ssk *eye(bw2, bw2);
-
-     h12km = -tapeSubsii.slice(iMate(iter, 2))*pow(rdenomkm, 3)*ssm + tapeSubsij.slice(iMate(iter, 2))*pow(rdenomkm, 3)*sskm - tapeSubsii.slice(iMate(iter, 3))*pow(rdenomkm, 3)*ssk + rdenomkm*eye(bw2, bw2);
-
-     sigEpsik = taperCovSub_cpp(resids(span::all,iMate(iter, 0)), resids(span::all,iMate(iter, 2)), bw, hu2s);
-     sigEpsim = taperCovSub_cpp(resids(span::all,iMate(iter, 0)), resids(span::all,iMate(iter, 3)), bw, hu2s);
-     sigEpsjk = taperCovSub_cpp(resids(span::all,iMate(iter, 1)), resids(span::all,iMate(iter, 2)), bw, hu2s);
-     sigEpsjm = taperCovSub_cpp(resids(span::all,iMate(iter, 1)), resids(span::all,iMate(iter, 3)), bw, hu2s);
-
-     cpse1 = eigenMult2((eigenMult2(h11ij, sigEpsik) + eigenMult2(h12ij, sigEpsjk)),
-                        (eigenMult2(h11km, sigEpsik) + eigenMult2(h12km, sigEpsim)));
-     cpse2 = eigenMult2((eigenMult2(h11ij, sigEpsim) + eigenMult2(h12ij, sigEpsjm)),
-                        (eigenMult2(h12km, sigEpsik) + eigenMult2(h22km, sigEpsim)));
-     cpse3 = eigenMult2((eigenMult2(h12ij, sigEpsik) + eigenMult2(h22ij, sigEpsjk)),
-                        (eigenMult2(h11km, sigEpsjk) + eigenMult2(h12km, sigEpsjm)));
-     cpse4 = eigenMult2((eigenMult2(h12ij, sigEpsim) + eigenMult2(h22ij, sigEpsjm)),
-                        (eigenMult2(h12km, sigEpsjk) + eigenMult2(h22km, sigEpsjm)));
-
-     Vijkm = n2bw*cpse1(bw, bw) + accu(cpse1(span(0, bw-1), span(0, bw-1)).diag()) +
-       n2bw*cpse2(bw, bw) + accu(cpse2(span(0, bw-1), span(0, bw-1)).diag()) +
-       n2bw*cpse3(bw, bw) + accu(cpse3(span(0, bw-1), span(0, bw-1)).diag()) +
-       n2bw*cpse4(bw, bw) + accu(cpse4(span(0, bw-1), span(0, bw-1)).diag());
-
-     pcCovs(iter) = Vijkm;
-   }
-
-   // Instantiating covariance matrix
-   arma::mat pcCovMat = upperTriFill_cpp(q, pcCovs);
-   pcCovMat.diag() = pcCovMat.diag() / 2;
-
-   return(pcCovMat + pcCovMat.t());
- }
-
-//' @title Taylor Series Estimate of Covariance Matrix for Partial Correlations
 //'
 //' @description This function calculates a second-order Taylor Series estimate of the covariance matrix for partial correlations of a weakly stationary multivariate time series.
 //'
-//' @param ts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
-//' @param bw nonnegative bandwidth parameter.
-//' @param iMatq matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
-//' @param iMate matrix of indices for partial correlations equal to royVarhelper(p, errors = TRUE).
+//' @param mvts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
+//' @param bandwidth nonnegative bandwidth parameter.
+//' @param correlation_indices matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
+//' @param residual_pairs matrix of indices for residual pairs equal to royVarhelper(p, errors = TRUE).
 //' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
-//' @param resids \eqn{nt} x \eqn{2q} matrix of regression residuals (optional). Default is to use ordinary least squares to calculate the residuals.
+//' @param correlation_pairs (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for partial correlations equal to royVarhelper(p, errors = FALSE).
+//' @param residuals_matrix \eqn{nt} x \eqn{2q} matrix of empirical residuals (optional). If not specified, residuals are obtained using ordinary least squares.
+//' @param diagonal_only Logical value, indicating if covariances between correlations are calculated (FALSE) or are returned as 0 (TRUE).
 //'
 //' @return \eqn{q} x \eqn{q} covariance matrix
 //'
@@ -705,59 +559,65 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
 //'
 //' @export
 // [[Rcpp::export]]
-arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate, int q, arma::mat resids = arma::mat()) {
+ arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals = R_NilValue, bool diagonal_only = false) {
 
-   iMatq = iMatq - 1;
-   iMate = iMate - 1;
+   correlation_indices = correlation_indices - 1;
+   residual_pairs = residual_pairs - 1;
 
-   int p = ts.n_cols;
-   int ncovs = iMate.n_rows;
-   int N = ts.n_rows;
-   arma::vec pcCovs(ncovs);
+   int p = mvts.n_cols;
+   int ncovs = residual_pairs.n_rows;
+   // int ncovs = Rcpp::as<int>(Rcpp::wrap(R::choose(q, 2))) + q;
+   int N = mvts.n_rows;
 
-   int bw2 = pow(bw + 1, 2);
-   int n2bw = ceil((N - 2*bw)/2);
+   // Initialize pcCovs with zeros
+   arma::vec pcCovs(ncovs, arma::fill::zeros);
+
+   int bandwidth2 = pow(bandwidth + 1, 2);
+   int n2bandwidth = ceil((N - 2*bandwidth)/2);
 
    // Tapering weights
-   arma::vec hu2s = cosTaper_cpp(regspace<vec>(-bw, bw)).elem(regspace<uvec>(bw - 1, 2*bw - 1));
+   arma::vec hu2s = cosTaper_cpp(regspace<vec>(-bandwidth, bandwidth)).elem(regspace<uvec>(bandwidth - 1, 2*bandwidth - 1));
    hu2s(0) = 1;
 
-   // Calculating residuals and tapered sub-matrices
-   arma::cube tapeSubsii(bw2, bw2, 2*q);
-   arma::cube tapeSubsij(bw2, bw2, 2*q);
+   // Calculating tapered sub-matrices
+   arma::cube tapeSubsii(bandwidth2, bandwidth2, 2*q);
+   arma::cube tapeSubsij(bandwidth2, bandwidth2, 2*q);
    int i;
    int j;
    arma::mat projMat(N, N);
    arma::mat designMat(N, p);
 
-   // Check if resids is specified
-   if (resids.is_empty()){
-     // Instantiate matrix for residuals
-     arma::mat resids(N, 2*q);
+   // Instantiate matrix for residuals
+   arma::mat residuals_matrix(N, 2*q);
 
+   // Check if residuals is specified
+   if (residuals.isNull()){
      // Calculate matrix of residuals if needed
      for(int iter = 1; iter < q + 1; iter++) {
-       designMat = ts;
-       i = iMatq(iter-1, 0);
-       j = iMatq(iter-1, 1);
+       designMat = mvts;
+       i = correlation_indices(iter-1, 0);
+       j = correlation_indices(iter-1, 1);
        designMat.shed_col(i);
        designMat.shed_col(j-1);
        projMat = designMat*arma::solve(designMat.t() * designMat, designMat.t());
-       resids(span::all, iter*2 - 2) = ts.col(i) - projMat*ts.col(i);
-       resids(span::all, iter*2 - 1) = ts.col(j) - projMat*ts.col(j);
-       tapeSubsii.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 2), bw, hu2s);
-       tapeSubsii.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 1), bw, hu2s);
-       tapeSubsij.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 1), bw, hu2s);
-       tapeSubsij.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 2), bw, hu2s);
+       residuals_matrix(span::all, iter*2 - 2) = mvts.col(i) - projMat*mvts.col(i);
+       residuals_matrix(span::all, iter*2 - 1) = mvts.col(j) - projMat*mvts.col(j);
+       tapeSubsii.slice(iter*2 - 2) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 2), residuals_matrix(span::all, iter*2 - 2), bandwidth, hu2s);
+       tapeSubsii.slice(iter*2 - 1) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 1), residuals_matrix(span::all, iter*2 - 1), bandwidth, hu2s);
+       tapeSubsij.slice(iter*2 - 2) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 2), residuals_matrix(span::all, iter*2 - 1), bandwidth, hu2s);
+       tapeSubsij.slice(iter*2 - 1) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 1), residuals_matrix(span::all, iter*2 - 2), bandwidth, hu2s);
      }
    } else{
+     // Convert residuals to arma::mat
+     NumericMatrix residuals_(residuals);
+     residuals_matrix = arma::mat(residuals_.begin(), residuals_.nrow(), residuals_.ncol(), false);
      for(int iter = 1; iter < q + 1; iter++) {
-       i = iMatq(iter-1, 0);
-       j = iMatq(iter-1, 1);
-       tapeSubsii.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 2), bw, hu2s);
-       tapeSubsii.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 1), bw, hu2s);
-       tapeSubsij.slice(iter*2 - 2) = taperCovSub_cpp(resids(span::all, iter*2 - 2), resids(span::all, iter*2 - 1), bw, hu2s);
-       tapeSubsij.slice(iter*2 - 1) = taperCovSub_cpp(resids(span::all, iter*2 - 1), resids(span::all, iter*2 - 2), bw, hu2s);
+       i = correlation_indices(iter-1, 0);
+       j = correlation_indices(iter-1, 1);
+       tapeSubsii.slice(iter*2 - 2) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 2), residuals_matrix(span::all, iter*2 - 2), bandwidth, hu2s);
+       tapeSubsii.slice(iter*2 - 1) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 1), residuals_matrix(span::all, iter*2 - 1), bandwidth, hu2s);
+       tapeSubsij.slice(iter*2 - 2) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 2), residuals_matrix(span::all, iter*2 - 1), bandwidth, hu2s);
+       tapeSubsij.slice(iter*2 - 1) = taperCovSub_cpp(residuals_matrix(span::all, iter*2 - 1), residuals_matrix(span::all, iter*2 - 2), bandwidth, hu2s);
      }
    }
 
@@ -771,52 +631,64 @@ arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate
    double sskm;
    double rdenomkm;
 
-   arma::mat h11ij(bw2, bw2, fill::zeros);
-   arma::mat h22ij(bw2, bw2, fill::zeros);
-   arma::mat h12ij(bw2, bw2, fill::zeros);
-   arma::mat h11km(bw2, bw2, fill::zeros);
-   arma::mat h22km(bw2, bw2, fill::zeros);
-   arma::mat h12km(bw2, bw2, fill::zeros);
+   arma::mat h11ij(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat h22ij(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat h12ij(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat h11km(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat h22km(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat h12km(bandwidth2, bandwidth2, fill::zeros);
 
-   arma::mat sigEpsik(bw2, bw2, fill::zeros);
-   arma::mat sigEpsim(bw2, bw2, fill::zeros);
-   arma::mat sigEpsjk(bw2, bw2, fill::zeros);
-   arma::mat sigEpsjm(bw2, bw2, fill::zeros);
+   arma::mat sigEpsik(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat sigEpsim(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat sigEpsjk(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat sigEpsjm(bandwidth2, bandwidth2, fill::zeros);
 
-   arma::mat cpse1(bw2, bw2, fill::zeros);
-   arma::mat cpse2(bw2, bw2, fill::zeros);
-   arma::mat cpse3(bw2, bw2, fill::zeros);
-   arma::mat cpse4(bw2, bw2, fill::zeros);
+   arma::mat cpse1(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat cpse2(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat cpse3(bandwidth2, bandwidth2, fill::zeros);
+   arma::mat cpse4(bandwidth2, bandwidth2, fill::zeros);
 
    double Vijkm;
 
    for(int iter = 0; iter < ncovs; iter++) {
-     ssi = tapeSubsii.slice(iMate(iter, 0))(0, 0)*(N-1);
-     ssj = tapeSubsii.slice(iMate(iter, 1))(0, 0)*(N-1);
-     ssij = tapeSubsij.slice(iMate(iter, 0))(0, 0)*(N-1);
+
+     // Make covariance between correlations be 0 if diagonal_only = TRUE (i != k or j != m)
+     if (diagonal_only && (correlation_pairs(iter, 0) != correlation_pairs(iter, 2) || correlation_pairs(iter, 1) != correlation_pairs(iter, 3))) {
+       continue; // Skip to the next iteration and leave as 0
+     }
+
+     // Make covariance between disjoint pairs be 0 (i != k,m and j != k,m)
+     if (correlation_pairs(iter, 0) != correlation_pairs(iter, 2) && correlation_pairs(iter, 0) != correlation_pairs(iter, 3) &&
+         correlation_pairs(iter, 1) != correlation_pairs(iter, 2) && correlation_pairs(iter, 1) != correlation_pairs(iter, 3)) {
+       continue; // Skip to the next iteration and leave as 0
+     }
+
+     ssi = tapeSubsii.slice(residual_pairs(iter, 0))(0, 0)*(N-1);
+     ssj = tapeSubsii.slice(residual_pairs(iter, 1))(0, 0)*(N-1);
+     ssij = tapeSubsij.slice(residual_pairs(iter, 0))(0, 0)*(N-1);
      rdenomij = 1 / sqrt(ssi * ssj);
 
-     ssk = tapeSubsii.slice(iMate(iter, 2))(0, 0)*(N-1);
-     ssm = tapeSubsii.slice(iMate(iter, 3))(0, 0)*(N-1);
-     sskm = tapeSubsij.slice(iMate(iter, 2))(0, 0)*(N-1);
+     ssk = tapeSubsii.slice(residual_pairs(iter, 2))(0, 0)*(N-1);
+     ssm = tapeSubsii.slice(residual_pairs(iter, 3))(0, 0)*(N-1);
+     sskm = tapeSubsij.slice(residual_pairs(iter, 2))(0, 0)*(N-1);
      rdenomkm = 1 / sqrt(ssk * ssm);
 
      // Hessian matrices
-     h11ij = -2*tapeSubsij.slice(iMate(iter, 0))*pow(rdenomij, 3) * ssj + 3*tapeSubsii.slice(iMate(iter, 0))*pow(rdenomij, 5)*pow(ssj, 2)*ssij - ssij*pow(rdenomij, 3)*ssj*eye(bw2, bw2);
-     h22ij = -2*tapeSubsij.slice(iMate(iter, 1))*pow(rdenomij, 3) * ssi + 3*tapeSubsii.slice(iMate(iter, 1))*pow(rdenomij, 5)*pow(ssi, 2)*ssij - ssij*pow(rdenomij, 3)*ssi*eye(bw2, bw2);
+     h11ij = -2*tapeSubsij.slice(residual_pairs(iter, 0))*pow(rdenomij, 3) * ssj + 3*tapeSubsii.slice(residual_pairs(iter, 0))*pow(rdenomij, 5)*pow(ssj, 2)*ssij - ssij*pow(rdenomij, 3)*ssj*eye(bandwidth2, bandwidth2);
+     h22ij = -2*tapeSubsij.slice(residual_pairs(iter, 1))*pow(rdenomij, 3) * ssi + 3*tapeSubsii.slice(residual_pairs(iter, 1))*pow(rdenomij, 5)*pow(ssi, 2)*ssij - ssij*pow(rdenomij, 3)*ssi*eye(bandwidth2, bandwidth2);
 
-     h12ij = -tapeSubsii.slice(iMate(iter, 0))*pow(rdenomij, 3)*ssj + tapeSubsij.slice(iMate(iter, 0))*pow(rdenomij, 3)*ssij - tapeSubsii.slice(iMate(iter, 1))*pow(rdenomij, 3)*ssi + rdenomij*eye(bw2, bw2);
+     h12ij = -tapeSubsii.slice(residual_pairs(iter, 0))*pow(rdenomij, 3)*ssj + tapeSubsij.slice(residual_pairs(iter, 0))*pow(rdenomij, 3)*ssij - tapeSubsii.slice(residual_pairs(iter, 1))*pow(rdenomij, 3)*ssi + rdenomij*eye(bandwidth2, bandwidth2);
 
-     h11km = -2*tapeSubsij.slice(iMate(iter, 2))*pow(rdenomkm, 3) * ssm + 3*tapeSubsii.slice(iMate(iter, 2))*pow(rdenomkm, 5)*pow(ssm, 2)*sskm - sskm*pow(rdenomkm, 3)*ssm *eye(bw2, bw2);
+     h11km = -2*tapeSubsij.slice(residual_pairs(iter, 2))*pow(rdenomkm, 3) * ssm + 3*tapeSubsii.slice(residual_pairs(iter, 2))*pow(rdenomkm, 5)*pow(ssm, 2)*sskm - sskm*pow(rdenomkm, 3)*ssm *eye(bandwidth2, bandwidth2);
 
-     h22km = -2*tapeSubsij.slice(iMate(iter, 3))*pow(rdenomkm, 3) * ssk + 3*tapeSubsii.slice(iMate(iter, 3))*pow(rdenomkm, 5)*pow(ssk, 2)*sskm - sskm*pow(rdenomkm, 3)*ssk *eye(bw2, bw2);
+     h22km = -2*tapeSubsij.slice(residual_pairs(iter, 3))*pow(rdenomkm, 3) * ssk + 3*tapeSubsii.slice(residual_pairs(iter, 3))*pow(rdenomkm, 5)*pow(ssk, 2)*sskm - sskm*pow(rdenomkm, 3)*ssk *eye(bandwidth2, bandwidth2);
 
-     h12km = -tapeSubsii.slice(iMate(iter, 2))*pow(rdenomkm, 3)*ssm + tapeSubsij.slice(iMate(iter, 2))*pow(rdenomkm, 3)*sskm - tapeSubsii.slice(iMate(iter, 3))*pow(rdenomkm, 3)*ssk + rdenomkm*eye(bw2, bw2);
+     h12km = -tapeSubsii.slice(residual_pairs(iter, 2))*pow(rdenomkm, 3)*ssm + tapeSubsij.slice(residual_pairs(iter, 2))*pow(rdenomkm, 3)*sskm - tapeSubsii.slice(residual_pairs(iter, 3))*pow(rdenomkm, 3)*ssk + rdenomkm*eye(bandwidth2, bandwidth2);
 
-     sigEpsik = taperCovSub_cpp(resids(span::all,iMate(iter, 0)), resids(span::all,iMate(iter, 2)), bw, hu2s);
-     sigEpsim = taperCovSub_cpp(resids(span::all,iMate(iter, 0)), resids(span::all,iMate(iter, 3)), bw, hu2s);
-     sigEpsjk = taperCovSub_cpp(resids(span::all,iMate(iter, 1)), resids(span::all,iMate(iter, 2)), bw, hu2s);
-     sigEpsjm = taperCovSub_cpp(resids(span::all,iMate(iter, 1)), resids(span::all,iMate(iter, 3)), bw, hu2s);
+     sigEpsik = taperCovSub_cpp(residuals_matrix(span::all,residual_pairs(iter, 0)), residuals_matrix(span::all,residual_pairs(iter, 2)), bandwidth, hu2s);
+     sigEpsim = taperCovSub_cpp(residuals_matrix(span::all,residual_pairs(iter, 0)), residuals_matrix(span::all,residual_pairs(iter, 3)), bandwidth, hu2s);
+     sigEpsjk = taperCovSub_cpp(residuals_matrix(span::all,residual_pairs(iter, 1)), residuals_matrix(span::all,residual_pairs(iter, 2)), bandwidth, hu2s);
+     sigEpsjm = taperCovSub_cpp(residuals_matrix(span::all,residual_pairs(iter, 1)), residuals_matrix(span::all,residual_pairs(iter, 3)), bandwidth, hu2s);
 
      cpse1 = eigenMult2((eigenMult2(h11ij, sigEpsik) + eigenMult2(h12ij, sigEpsjk)),
                         (eigenMult2(h11km, sigEpsik) + eigenMult2(h12km, sigEpsim)));
@@ -827,10 +699,10 @@ arma::mat partialCov_cpp2(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate
      cpse4 = eigenMult2((eigenMult2(h12ij, sigEpsim) + eigenMult2(h22ij, sigEpsjm)),
                         (eigenMult2(h12km, sigEpsjk) + eigenMult2(h22km, sigEpsjm)));
 
-     Vijkm = n2bw*cpse1(bw, bw) + accu(cpse1(span(0, bw-1), span(0, bw-1)).diag()) +
-       n2bw*cpse2(bw, bw) + accu(cpse2(span(0, bw-1), span(0, bw-1)).diag()) +
-       n2bw*cpse3(bw, bw) + accu(cpse3(span(0, bw-1), span(0, bw-1)).diag()) +
-       n2bw*cpse4(bw, bw) + accu(cpse4(span(0, bw-1), span(0, bw-1)).diag());
+     Vijkm = n2bandwidth*cpse1(bandwidth, bandwidth) + accu(cpse1(span(0, bandwidth-1), span(0, bandwidth-1)).diag()) +
+             n2bandwidth*cpse2(bandwidth, bandwidth) + accu(cpse2(span(0, bandwidth-1), span(0, bandwidth-1)).diag()) +
+             n2bandwidth*cpse3(bandwidth, bandwidth) + accu(cpse3(span(0, bandwidth-1), span(0, bandwidth-1)).diag()) +
+             n2bandwidth*cpse4(bandwidth, bandwidth) + accu(cpse4(span(0, bandwidth-1), span(0, bandwidth-1)).diag());
 
      pcCovs(iter) = Vijkm;
    }
