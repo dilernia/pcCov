@@ -250,12 +250,12 @@ partialCov_cpp <- function(ts, bw, iMatq, iMate, q) {
 #'
 #' @param mvts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 #' @param bandwidth nonnegative bandwidth parameter.
+#' @param structure Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").
 #' @param correlation_indices matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
 #' @param residual_pairs matrix of indices for residual pairs equal to royVarhelper(p, errors = TRUE).
 #' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
 #' @param correlation_pairs (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for partial correlations equal to royVarhelper(p, errors = FALSE).
 #' @param residuals_matrix \eqn{nt} x \eqn{2q} matrix of empirical residuals (optional). If not specified, residuals are obtained using ordinary least squares.
-#' @param diagonal_only Logical value, indicating if covariances between correlations are calculated (FALSE) or are returned as 0 (TRUE).
 #'
 #' @return \eqn{q} x \eqn{q} covariance matrix
 #'
@@ -263,8 +263,8 @@ partialCov_cpp <- function(ts, bw, iMatq, iMate, q) {
 #' Andrew DiLernia
 #'
 #' @export
-partial_corr_asymptotic_cov_cpp <- function(mvts, bandwidth, q, correlation_indices, residual_pairs, correlation_pairs, residuals = NULL, diagonal_only = FALSE) {
-    .Call(`_pcCov_partial_corr_asymptotic_cov_cpp`, mvts, bandwidth, q, correlation_indices, residual_pairs, correlation_pairs, residuals, diagonal_only)
+partial_corr_asymptotic_cov_cpp <- function(mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals = NULL, diagonal_only = FALSE) {
+    .Call(`_pcCov_partial_corr_asymptotic_cov_cpp`, mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals, diagonal_only)
 }
 
 thetaHat_cpp <- function(i, j, l, m, ts, n, hu2s, ccMat) {

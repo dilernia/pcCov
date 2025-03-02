@@ -207,7 +207,7 @@ partialCov <- function(ts, bw = NULL) {
 #'
 #' @param mvts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 #' @param bandwidth Optional nonnegative bandwidth parameter. If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).
-#' @param diagonal_only Optional logical value, indicating if covariances between correlations are calculated (FALSE) or are returned as 0 (TRUE).
+#' @param structure Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while all others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").
 #' @param residuals Optional \eqn{nt} x \eqn{2q} matrix of empirical residuals (optional). If not specified, residuals are obtained using ordinary least squares.
 #' @param correlation_indices Optional matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
 #' @param residual_pairs Optional (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for residual pairs equal to royVarhelper(p, errors = TRUE).
@@ -225,7 +225,7 @@ partialCov <- function(ts, bw = NULL) {
 #' myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
 #'
 #' # Asymptotic covariance matrix for partial correlations
-#' partial_corr_asymptotic_cov(mvts = myTS)
+#' partial_corr_asymptotic_cov(mvts = myTS, bandwidth = 4, structure = "unstructured")
 #'
 #' @references
 #' A S DiLernia, M Fiecas, L Zhang.
@@ -238,7 +238,12 @@ partialCov <- function(ts, bw = NULL) {
 #' \emph{Econometric Reviews}, 23(1), 53-70.
 #'
 #' @export
-partial_corr_asymptotic_cov <- function(mvts, bandwidth = NULL, diagonal_only = FALSE, residuals = NULL, residual_pairs = NULL, correlation_pairs = NULL, correlation_indices = NULL) {
+partial_corr_asymptotic_cov <- function(mvts, bandwidth = NULL, structure = "unstructured", residuals = NULL, residual_pairs = NULL, correlation_pairs = NULL, correlation_indices = NULL) {
+
+  if(!(structure %in% c("unstructured", "intersecting-pairs", "diagonal"))) {
+    stop(paste0("Argument structure (", structure, ") must be one of 'unstructured', 'intersecting-pairs', or 'diagonal'."))
+  }
+
   p <- ncol(mvts)
   q <- choose(p, 2)
 
@@ -258,10 +263,10 @@ partial_corr_asymptotic_cov <- function(mvts, bandwidth = NULL, diagonal_only = 
   }
   return(pcCov::partial_corr_asymptotic_cov_cpp(mvts = mvts,
                                                 bandwidth = bandwidth,
+                                                structure = structure,
                                                 q = q,
                                                 correlation_indices = correlation_indices,
                                                 residual_pairs = residual_pairs,
                                                 correlation_pairs = correlation_pairs,
-                                                residuals = residuals,
-                                                diagonal_only = diagonal_only))
+                                                residuals = residuals))
 }

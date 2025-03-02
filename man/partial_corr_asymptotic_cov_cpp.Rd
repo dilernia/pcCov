@@ -7,6 +7,7 @@
 partial_corr_asymptotic_cov_cpp(
   mvts,
   bandwidth,
+  structure,
   q,
   correlation_indices,
   residual_pairs,
@@ -20,6 +21,8 @@ partial_corr_asymptotic_cov_cpp(
 
 \item{bandwidth}{nonnegative bandwidth parameter.}
 
+\item{structure}{Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").}
+
 \item{q}{number of unique partial correlations equal to choose(\eqn{p}, 2).}
 
 \item{correlation_indices}{matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).}
@@ -27,8 +30,6 @@ partial_corr_asymptotic_cov_cpp(
 \item{residual_pairs}{matrix of indices for residual pairs equal to royVarhelper(p, errors = TRUE).}
 
 \item{correlation_pairs}{(choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for partial correlations equal to royVarhelper(p, errors = FALSE).}
-
-\item{diagonal_only}{Logical value, indicating if covariances between correlations are calculated (FALSE) or are returned as 0 (TRUE).}
 
 \item{residuals_matrix}{\eqn{nt} x \eqn{2q} matrix of empirical residuals (optional). If not specified, residuals are obtained using ordinary least squares.}
 }

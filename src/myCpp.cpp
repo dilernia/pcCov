@@ -545,12 +545,12 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
 //'
 //' @param mvts \eqn{nt} x \eqn{p} matrix of observed \eqn{p}-variate time series.
 //' @param bandwidth nonnegative bandwidth parameter.
+//' @param structure Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").
 //' @param correlation_indices matrix of indices for partial correlations equal to unique(royVarhelper(p)[, 1:2]).
 //' @param residual_pairs matrix of indices for residual pairs equal to royVarhelper(p, errors = TRUE).
 //' @param q number of unique partial correlations equal to choose(\eqn{p}, 2).
 //' @param correlation_pairs (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for partial correlations equal to royVarhelper(p, errors = FALSE).
 //' @param residuals_matrix \eqn{nt} x \eqn{2q} matrix of empirical residuals (optional). If not specified, residuals are obtained using ordinary least squares.
-//' @param diagonal_only Logical value, indicating if covariances between correlations are calculated (FALSE) or are returned as 0 (TRUE).
 //'
 //' @return \eqn{q} x \eqn{q} covariance matrix
 //'
@@ -559,7 +559,7 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
 //'
 //' @export
 // [[Rcpp::export]]
- arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals = R_NilValue, bool diagonal_only = false) {
+ arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, std::string structure, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals = R_NilValue, bool diagonal_only = false) {
 
    correlation_indices = correlation_indices - 1;
    residual_pairs = residual_pairs - 1;
@@ -652,13 +652,13 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
 
    for(int iter = 0; iter < ncovs; iter++) {
 
-     // Make covariance between correlations be 0 if diagonal_only = TRUE (i != k or j != m)
-     if (diagonal_only && (correlation_pairs(iter, 0) != correlation_pairs(iter, 2) || correlation_pairs(iter, 1) != correlation_pairs(iter, 3))) {
+     // Make covariance between correlations be 0 if structure == "diagonal" (i != k or j != m)
+     if (structure == "diagonal" && (correlation_pairs(iter, 0) != correlation_pairs(iter, 2) || correlation_pairs(iter, 1) != correlation_pairs(iter, 3))) {
        continue; // Skip to the next iteration and leave as 0
      }
 
-     // Make covariance between disjoint pairs be 0 (i != k,m and j != k,m)
-     if (correlation_pairs(iter, 0) != correlation_pairs(iter, 2) && correlation_pairs(iter, 0) != correlation_pairs(iter, 3) &&
+     // Make covariance between disjoint pairs be 0 if structure == "intersecting-pairs" (i != k,m and j != k,m)
+     if (structure == "intersecting-pairs" && correlation_pairs(iter, 0) != correlation_pairs(iter, 2) && correlation_pairs(iter, 0) != correlation_pairs(iter, 3) &&
          correlation_pairs(iter, 1) != correlation_pairs(iter, 2) && correlation_pairs(iter, 1) != correlation_pairs(iter, 3)) {
        continue; // Skip to the next iteration and leave as 0
      }

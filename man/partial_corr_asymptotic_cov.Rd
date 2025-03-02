@@ -7,7 +7,7 @@
 partial_corr_asymptotic_cov(
   mvts,
   bandwidth = NULL,
-  diagonal_only = FALSE,
+  structure = "unstructured",
   residuals = NULL,
   residual_pairs = NULL,
   correlation_pairs = NULL,
@@ -19,7 +19,7 @@ partial_corr_asymptotic_cov(
 
 \item{bandwidth}{Optional nonnegative bandwidth parameter. If not specified, optimal bandwidth is determined using the method described in Patton, Politis and White (2009).}
 
-\item{diagonal_only}{Optional logical value, indicating if covariances between correlations are calculated (FALSE) or are returned as 0 (TRUE).}
+\item{structure}{Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while all others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").}
 
 \item{residuals}{Optional \eqn{nt} x \eqn{2q} matrix of empirical residuals (optional). If not specified, residuals are obtained using ordinary least squares.}
 
@@ -42,7 +42,7 @@ set.seed(1994)
 myTS <- varSim(nt = 50, coeffMat = diag(0.50, 5), covMat = diag(1, 5))
 
 # Asymptotic covariance matrix for partial correlations
-partial_corr_asymptotic_cov(mvts = myTS)
+partial_corr_asymptotic_cov(mvts = myTS, bandwidth = 4, structure = "unstructured")
 
 }
 \references{
