@@ -263,8 +263,30 @@ partialCov_cpp <- function(ts, bw, iMatq, iMate, q) {
 #' Andrew DiLernia
 #'
 #' @export
-partial_corr_asymptotic_cov_cpp <- function(mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals = NULL, diagonal_only = FALSE) {
-    .Call(`_pcCov_partial_corr_asymptotic_cov_cpp`, mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals, diagonal_only)
+partial_corr_asymptotic_cov_cpp <- function(mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals = NULL) {
+    .Call(`_pcCov_partial_corr_asymptotic_cov_cpp`, mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals)
+}
+
+#' @title Asymptotic Covariance Matrix for Correlations of Hedges and Olkin (1983)
+#'
+#' @description This function calculates an asymptotic estimate of the covariance matrix for a vector of correlations as given by Hedges and Olkin (1983).
+#'
+#' @param correlation_matrix \eqn{p} x \eqn{p} correlation matrix
+#' @param n number of observations
+#' @param structure Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").
+#' @param correlation_pairs (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for correlations equal to royVarhelper(p, errors = FALSE) where \eqn{q} = \eqn{p} choose \eqn{2}.
+#'
+#' @return \eqn{q} x \eqn{q} covariance matrix
+#'
+#' @references
+#' Hedges, L. V. and Olkin, I. (1983). Joint distributions of some indices based on correlation coefficients. In Studies in Econometrics, Time Series, and Multivariate Statistics, 437–454. Academic Press.
+#'
+#' @author
+#' Andrew DiLernia
+#'
+#' @export
+correlations_covariance_hedges_olkin_cpp <- function(correlation_matrix, n, correlation_pairs, structure = "unstructured") {
+    .Call(`_pcCov_correlations_covariance_hedges_olkin_cpp`, correlation_matrix, n, correlation_pairs, structure)
 }
 
 thetaHat_cpp <- function(i, j, l, m, ts, n, hu2s, ccMat) {

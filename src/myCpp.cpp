@@ -559,7 +559,7 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
 //'
 //' @export
 // [[Rcpp::export]]
- arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, std::string structure, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals = R_NilValue, bool diagonal_only = false) {
+ arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, std::string structure, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals = R_NilValue) {
 
    correlation_indices = correlation_indices - 1;
    residual_pairs = residual_pairs - 1;
@@ -712,6 +712,94 @@ arma::mat partialCov_cpp(arma::mat ts, int bw, arma::mat iMatq, arma::mat iMate,
    pcCovMat.diag() = pcCovMat.diag() / 2;
 
    return(pcCovMat + pcCovMat.t());
+ }
+
+//' @title Asymptotic Covariance Matrix for Correlations of Hedges and Olkin (1983)
+//'
+//' @description This function calculates an asymptotic estimate of the covariance matrix for a vector of correlations as given by Hedges and Olkin (1983).
+//'
+//' @param correlation_matrix \eqn{p} x \eqn{p} correlation matrix
+//' @param n number of observations
+//' @param structure Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").
+//' @param correlation_pairs (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for correlations equal to royVarhelper(p, errors = FALSE) where \eqn{q} = \eqn{p} choose \eqn{2}.
+//'
+//' @return \eqn{q} x \eqn{q} covariance matrix
+//'
+//' @references
+//' Hedges, L. V. and Olkin, I. (1983). Joint distributions of some indices based on correlation coefficients. In Studies in Econometrics, Time Series, and Multivariate Statistics, 437–454. Academic Press.
+//'
+//' @author
+//' Andrew DiLernia
+//'
+//' @export
+// [[Rcpp::export]]
+ arma::mat correlations_covariance_hedges_olkin_cpp(arma::mat correlation_matrix, int n, arma::mat correlation_pairs, std::string structure = "unstructured") {
+
+   // Adjusting indices to start indexing at 0 for C++
+   correlation_pairs = correlation_pairs - 1;
+
+   // Number of variables
+   int p = correlation_matrix.n_cols;
+
+   // Number of unique correlations
+   int q = (p * (p - 1)) / 2;
+
+   // Number of unique covariances to calculate
+   int n_covs = correlation_pairs.n_rows;
+
+   // Initialize correlation covariances with zeros
+   arma::vec correlation_covariances(n_covs, arma::fill::zeros);
+
+   double covariance_ijkm;
+   int i;
+   int j;
+   int k;
+   int m;
+
+   double rij;
+   double rik;
+   double rim;
+   double rjk;
+   double rjm;
+   double rkm;
+
+   for(int iter = 0; iter < n_covs; iter++) {
+
+     // Make covariance between correlations be 0 if structure == "diagonal" (i != k or j != m)
+     if (structure == "diagonal" && (correlation_pairs(iter, 0) != correlation_pairs(iter, 2) || correlation_pairs(iter, 1) != correlation_pairs(iter, 3))) {
+       continue; // Skip to the next iteration and leave as 0
+     }
+
+     // Make covariance between disjoint pairs be 0 if structure == "intersecting-pairs" (i != k,m and j != k,m)
+     if (structure == "intersecting-pairs" && correlation_pairs(iter, 0) != correlation_pairs(iter, 2) && correlation_pairs(iter, 0) != correlation_pairs(iter, 3) &&
+         correlation_pairs(iter, 1) != correlation_pairs(iter, 2) && correlation_pairs(iter, 1) != correlation_pairs(iter, 3)) {
+       continue; // Skip to the next iteration and leave as 0
+     }
+
+     i = correlation_pairs(iter, 0);
+     j = correlation_pairs(iter, 1);
+     k = correlation_pairs(iter, 2);
+     m = correlation_pairs(iter, 3);
+
+     rij = correlation_matrix(i, j);
+     rik = correlation_matrix(i, k);
+     rim = correlation_matrix(i, m);
+     rjk = correlation_matrix(j, k);
+     rjm = correlation_matrix(j, m);
+     rkm = correlation_matrix(k, m);
+
+     covariance_ijkm = 0.5 * rij * rkm * (rik*rik + rim*rim + rjk*rjk + rjm*rjm) +
+                             rik * rjm + rim * rjk -
+                            (rij * rik * rim + rij * rjk * rjm + rik * rjk * rkm + rim * rjm * rkm);
+
+     correlation_covariances(iter) = covariance_ijkm;
+   }
+
+   // Instantiating covariance matrix
+   arma::mat covariance_matrix = upperTriFill_cpp(q, correlation_covariances / n);
+   covariance_matrix.diag() = covariance_matrix.diag() / 2;
+
+   return(covariance_matrix + covariance_matrix.t());
  }
 
 // [[Rcpp::export]]

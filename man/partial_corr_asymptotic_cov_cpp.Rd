@@ -12,8 +12,7 @@ partial_corr_asymptotic_cov_cpp(
   correlation_indices,
   residual_pairs,
   correlation_pairs,
-  residuals = NULL,
-  diagonal_only = FALSE
+  residuals = NULL
 )
 }
 \arguments{

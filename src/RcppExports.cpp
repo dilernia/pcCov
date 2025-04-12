@@ -232,8 +232,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // partial_corr_asymptotic_cov_cpp
-arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, std::string structure, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals, bool diagonal_only);
-RcppExport SEXP _pcCov_partial_corr_asymptotic_cov_cpp(SEXP mvtsSEXP, SEXP bandwidthSEXP, SEXP structureSEXP, SEXP qSEXP, SEXP correlation_indicesSEXP, SEXP residual_pairsSEXP, SEXP correlation_pairsSEXP, SEXP residualsSEXP, SEXP diagonal_onlySEXP) {
+arma::mat partial_corr_asymptotic_cov_cpp(arma::mat mvts, int bandwidth, std::string structure, int q, arma::mat correlation_indices, arma::mat residual_pairs, arma::mat correlation_pairs, Nullable<NumericMatrix> residuals);
+RcppExport SEXP _pcCov_partial_corr_asymptotic_cov_cpp(SEXP mvtsSEXP, SEXP bandwidthSEXP, SEXP structureSEXP, SEXP qSEXP, SEXP correlation_indicesSEXP, SEXP residual_pairsSEXP, SEXP correlation_pairsSEXP, SEXP residualsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -245,8 +245,21 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type residual_pairs(residual_pairsSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type correlation_pairs(correlation_pairsSEXP);
     Rcpp::traits::input_parameter< Nullable<NumericMatrix> >::type residuals(residualsSEXP);
-    Rcpp::traits::input_parameter< bool >::type diagonal_only(diagonal_onlySEXP);
-    rcpp_result_gen = Rcpp::wrap(partial_corr_asymptotic_cov_cpp(mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals, diagonal_only));
+    rcpp_result_gen = Rcpp::wrap(partial_corr_asymptotic_cov_cpp(mvts, bandwidth, structure, q, correlation_indices, residual_pairs, correlation_pairs, residuals));
+    return rcpp_result_gen;
+END_RCPP
+}
+// correlations_covariance_hedges_olkin_cpp
+arma::mat correlations_covariance_hedges_olkin_cpp(arma::mat correlation_matrix, int n, arma::mat correlation_pairs, std::string structure);
+RcppExport SEXP _pcCov_correlations_covariance_hedges_olkin_cpp(SEXP correlation_matrixSEXP, SEXP nSEXP, SEXP correlation_pairsSEXP, SEXP structureSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type correlation_matrix(correlation_matrixSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type correlation_pairs(correlation_pairsSEXP);
+    Rcpp::traits::input_parameter< std::string >::type structure(structureSEXP);
+    rcpp_result_gen = Rcpp::wrap(correlations_covariance_hedges_olkin_cpp(correlation_matrix, n, correlation_pairs, structure));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -627,7 +640,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_pcCov_taperCovSub_cpp", (DL_FUNC) &_pcCov_taperCovSub_cpp, 4},
     {"_pcCov_upperTriFill_cpp", (DL_FUNC) &_pcCov_upperTriFill_cpp, 2},
     {"_pcCov_partialCov_cpp", (DL_FUNC) &_pcCov_partialCov_cpp, 5},
-    {"_pcCov_partial_corr_asymptotic_cov_cpp", (DL_FUNC) &_pcCov_partial_corr_asymptotic_cov_cpp, 9},
+    {"_pcCov_partial_corr_asymptotic_cov_cpp", (DL_FUNC) &_pcCov_partial_corr_asymptotic_cov_cpp, 8},
+    {"_pcCov_correlations_covariance_hedges_olkin_cpp", (DL_FUNC) &_pcCov_correlations_covariance_hedges_olkin_cpp, 4},
     {"_pcCov_thetaHat_cpp", (DL_FUNC) &_pcCov_thetaHat_cpp, 8},
     {"_pcCov_deltaHat_cpp", (DL_FUNC) &_pcCov_deltaHat_cpp, 9},
     {"_pcCov_royVar_cpp", (DL_FUNC) &_pcCov_royVar_cpp, 4},
