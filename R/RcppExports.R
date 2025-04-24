@@ -274,7 +274,7 @@ partial_corr_asymptotic_cov_cpp <- function(mvts, bandwidth, structure, q, corre
 #' @param correlation_matrix \eqn{p} x \eqn{p} correlation matrix
 #' @param n number of observations
 #' @param structure Optional covariance structure, indicating whether to use a covariance estimator in which every entry is estimated ("unstructured"), covariances between correlations with disjoint pairs of variables are set to 0 while others are estimated ("intersecting-pairs"), or off-diagonal entries are set to 0 and diagonal entries are estimated ("diagonal").
-#' @param correlation_pairs (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for correlations equal to royVarhelper(p, errors = FALSE) where \eqn{q} = \eqn{p} choose \eqn{2}.
+#' @param correlation_pairs (choose(\eqn{q}, 2) + \eqn{q}) x 4 matrix of indices for correlations equal to royVarhelper(p, errors = FALSE) where \eqn{q} = choose(\eqn{p}, 2) .
 #'
 #' @return \eqn{q} x \eqn{q} covariance matrix
 #'

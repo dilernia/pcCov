@@ -1,0 +1,17 @@
+#!/bin/sh
+
+echo "** Configuring platform-specific compiler flags **"
+
+# Detect gfortran
+GFORTRAN=$(which gfortran)
+GCC_LIB_DIR=$($GFORTRAN -print-libgcc-file-name 2>/dev/null | xargs dirname)
+
+# Fall back if detection fails
+if [ -z "$GCC_LIB_DIR" ]; then
+  GCC_LIB_DIR="/usr/local/lib"  # generic fallback
+fi
+
+# Write to src/Makevars (from template)
+sed "s|@GCC_LIB_DIR@|$GCC_LIB_DIR|g" src/Makevars.in > src/Makevars
+
+echo "** Done configuring **"
